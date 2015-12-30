@@ -5,19 +5,24 @@
     "publisher": "xyz",
 	"version": "0.0.2",
 	"engines": {
-		"vscode": "^0.10.1"
+	    "vscode": "^0.10.1"
 	},
     "icon": "local-history.png",
+    "homepage": "https://github.com/zabel-xyz/local-history",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/zabel-xyz/local-history.git"
+    },
 	"categories": [
-		"Other"
+	    "Other"
 	],
 	"activationEvents": [
-		"*"
+	    "*"
 	],
 	"contributes": {
-		"commands": [{
-			"command": "local-history.showAll",
-			"title": "Local History: Show all"
+	    "commands": [{
+		    "command": "local-history.showAll",
+		    "title": "Local History: Show all"
         },{
 			"command": "local-history.showCurrent",
 			"title": "Local History: Show current version"
