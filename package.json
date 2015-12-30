@@ -1,0 +1,66 @@
+{
+	"name": "local-history",
+	"displayName": "Local History",
+	"description": "Save files into local history",
+    "publisher": "xyz",
+	"version": "0.0.2",
+	"engines": {
+		"vscode": "^0.10.1"
+	},
+    "icon": "local-history.png",
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"*"
+	],
+	"contributes": {
+		"commands": [{
+			"command": "local-history.showAll",
+			"title": "Local History: Show all"
+        },{
+			"command": "local-history.showCurrent",
+			"title": "Local History: Show current version"
+        },{
+			"command": "local-history.compareToCurrent",
+			"title": "Local History: Compare to current version"
+        },{
+			"command": "local-history.compareToActive",
+			"title": "Local History: Compare to active file"
+        },{
+			"command": "local-history.compareToPrevious",
+			"title": "Local History: Compare to previous"
+        }],
+        "configuration": {
+            "type": "object",
+            "title": "Local history configuration",
+            "properties": {
+                "local-history.daysLimit": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "A day number to purge local history. (0: no purge)"
+                },
+                "local-history.maxDisplay": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "A max files to display"
+                },
+                "local-history.exclude": {
+                    "type": "string",
+                    "default": "{.history,.vscode,**/node_modules,typings}",
+                    "description": "Files or folder to not save in local history"
+                }
+            }
+ 		}
+	},
+	"main": "./out/src/extension",
+	"scripts": {
+		"vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+		"compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
+	},
+	"devDependencies": {
+		"typescript": "^1.6.2",
+		"vscode": "0.10.x",
+        "path": "last"
+	}
+}

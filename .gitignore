@@ -1,0 +1,6 @@
+*.map
+*.vsix
+
+.history/*
+node_modules/*
+out/*
