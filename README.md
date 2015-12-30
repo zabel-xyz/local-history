@@ -7,7 +7,7 @@ At any time, you can compare a file with any older version from the history.
 It can help you out when you change or delete a file by accident.
 The history can also help you out when your workspace has a catastrophic problem.
 Each file revision is stored in a separate file (with full path) inside the .history folder of your workspace directory.
-e.g.,  .history/foo/bar/myFile_20151212205930.ts
+e.g., `.history/foo/bar/myFile_20151212205930.ts`
 
 #Settings
     {
