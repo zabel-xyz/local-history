@@ -20,6 +20,7 @@ e.g.,  .history/foo/bar/myFile_20151212205930.ts
     local-history.showAll // Show all history available to select (limited with maxDisplay settings)
 
 new in version 0.0.2:
+
     local-history.showCurrent // Show current version (if history version is active)
     local-history.compareToCurrent // compare current version with another version in history
     local-history.compareToActive // compare active file with another version in history
