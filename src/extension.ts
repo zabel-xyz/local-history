@@ -51,6 +51,7 @@ export function activate(disposables: Disposable[]) {
  */
 class HistoryController {
     private settings: IHistorySettings;
+    private mkdirp = require('mkdirp');
 
     constructor() {
         this.settings = this.readSettings();
@@ -104,18 +105,17 @@ class HistoryController {
                         '.history',
                         dir,
                         revisionFile);
-                me.mkDirRecursive(revisionFile);
-
-                fs.writeFile(revisionFile, document.getText(), function(err) {
-                    if (err) {
-                        window.showErrorMessage(
-                                'Can not save the revision of the file: '+document.fileName+
-                                ' Error: '+ err.toString());
-                    } else {
-                        if (me.settings.daysLimit > 0)
-                            me.purge(document);
-                    }
-                });
+                if (me.mkDirRecursive(revisionFile))
+                    fs.writeFile(revisionFile, document.getText(), function(err) {
+                        if (err) {
+                            window.showErrorMessage(
+                                    'Can not save the revision of the file: '+document.fileName+
+                                    ' Error: '+ err.toString());
+                        } else {
+                            if (me.settings.daysLimit > 0)
+                                me.purge(document);
+                        }
+                    });
 
             })
     }
@@ -325,26 +325,39 @@ class HistoryController {
             return '';
     }
 
-    private mkDirRecursive(fileName: String) {
-        let paths = [],
-            dirs, tmp, sep;
+    private mkDirRecursive(fileName: string): boolean {
 
-        if (fileName.indexOf('\\')) {
-            dirs = fileName.split('\\');
-            sep = '\\';
-        } else {
-            dirs = fileName.split('/');
-            sep = '/';
+        try {
+            this.mkdirp.sync(path.dirname(fileName));
+            return true;
+        }
+        catch(err) {
+            window.showErrorMessage(
+                'Error with mkdirp: '+err.toString()+' file '+fileName);
+            return false;
         }
 
-        while (dirs.length > 1) {
-            paths.push(dirs.shift());
-            if (paths[paths.length-1].indexOf(':') < 0) {
-                tmp = paths.join(sep);
-                if (!fs.existsSync(tmp))
-                    fs.mkdirSync(tmp);
-            }
-        }
+
+
+        // let paths = [],
+        //     dirs, tmp, sep;
+
+        // if (fileName.indexOf('\\')) {
+        //     dirs = fileName.split('\\');
+        //     sep = '\\';
+        // } else {
+        //     dirs = fileName.split('/');
+        //     sep = '/';
+        // }
+
+        // while (dirs.length > 1) {
+        //     paths.push(dirs.shift());
+        //     if (paths[paths.length-1].indexOf(':') < 0) {
+        //         tmp = paths.join(sep);
+        //         if (!fs.existsSync(tmp))
+        //             fs.mkdirSync(tmp);
+        //     }
+        // }
     }
 
     private getFileName(file: string): string {
