@@ -81,7 +81,7 @@ class HistoryController {
             .then(files => {
 
                 // exclude file
-                if (!files.length) {
+                if (!files || !files.length) {
                     return;
                 }
 
@@ -160,34 +160,39 @@ class HistoryController {
 
         workspace.findFiles(me.buildRevisionPatternPath(document), '')
             .then(files => {
-                if (files && files.length > 0) {
-                    let displayFiles = [],
-                        last = 0;
-                    // show only x elements according to maxDisplay
-                    if (me.settings.maxDisplay > 0 && me.settings.maxDisplay < files.length)
-                        last = files.length - me.settings.maxDisplay;
-                    // desc order history
-                    for (let index = files.length - 1, file; index >= last; index--) {
-                        file = files[index];
-                        displayFiles.push({
-                            description: file.fsPath.substring(lengthToStripOff),
-                            label: me.getFileName(file.fsPath),
-                            filePath: file.fsPath,
-                            previous: files[index - 1]
-                        });
-                    }
-                    window.showQuickPick(displayFiles)
-                        .then(val=> {
-                            if (val) {
-                                let actionValues: IHistoryActionValues = {
-                                        active: document.fileName,
-                                        selected: val.filePath,
-                                        previous: val.previous
-                                    };
-                                action.apply(me, [actionValues]);
-                            }
-                        });
+
+                if (!files || !files.length) {
+                    return;
                 }
+
+                let displayFiles = [],
+                    last = 0;
+
+                // show only x elements according to maxDisplay
+                if (me.settings.maxDisplay > 0 && me.settings.maxDisplay < files.length)
+                    last = files.length - me.settings.maxDisplay;
+                // desc order history
+                for (let index = files.length - 1, file; index >= last; index--) {
+                    file = files[index];
+                    displayFiles.push({
+                        description: file.fsPath.substring(lengthToStripOff),
+                        label: me.getFileName(file.fsPath),
+                        filePath: file.fsPath,
+                        previous: files[index - 1]
+                    });
+                }
+
+                window.showQuickPick(displayFiles)
+                    .then(val=> {
+                        if (val) {
+                            let actionValues: IHistoryActionValues = {
+                                    active: document.fileName,
+                                    selected: val.filePath,
+                                    previous: val.previous
+                                };
+                            action.apply(me, [actionValues]);
+                        }
+                    });
             });
     }
 
@@ -299,6 +304,11 @@ class HistoryController {
 
         workspace.findFiles(me.buildRevisionPatternPath(document), '')
             .then(files => {
+
+                if (!files || !files.length) {
+                    return;
+                }
+
                 let stat: fs.Stats,
                     now: Number = new Date().getTime(),
                     endTime: Number;
