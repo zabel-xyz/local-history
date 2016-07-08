@@ -13,6 +13,7 @@ interface IHistorySettings {
     daysLimit: number;
     maxDisplay: number;
     exclude: string;
+    enabled: boolean;
 }
 
 interface IHistoryActionValues {
@@ -58,7 +59,7 @@ class HistoryController {
     }
 
     public SaveRevision(document: TextDocument) {
-        if (workspace.rootPath === null) {
+        if ((workspace.rootPath === null) || !this.settings.enabled) {
             return;
         }
 
@@ -217,7 +218,7 @@ class HistoryController {
             return new Promise((resolve, reject) => {
                 workspace.openTextDocument(filePath)
                     .then(d=> {
-                        window.showTextDocument(d)
+                        window.showTextDocument(d, window.activeTextEditor.viewColumn)
                             .then(()=>resolve(), (err)=>reject(err))
                     }, (err)=>reject(err));
             });
@@ -386,7 +387,8 @@ class HistoryController {
         return {
             daysLimit: <number>config.get('daysLimit') || 30,
             maxDisplay: <number>config.get('maxDisplay') || 10,
-            exclude: <string>config.get("exclude") || "{.history,.vscode,**/node_modules,typings}"
+            exclude: <string>config.get("exclude") || "{.history,.vscode,**/node_modules,typings,out}",
+            enabled: <boolean>config.get("enabled")
         }
     }
 }

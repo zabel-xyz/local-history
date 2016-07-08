@@ -13,15 +13,17 @@ e.g., `.history/foo/bar/myFile_20151212205930.ts`
     {
         "local-history.daysLimit":  30, // A day number to purge local history. (0: no purge)
         "local-history.maxDisplay": 10, // A max files to display with local history commands
-        "local-history.exclude": "{.history,.vscode,**/node_modules,typings}" // Files or folders not to save in local history
+        "local-history.exclude": "{.history,.vscode,**/node_modules,typings,out}" // Files or folders not to save in local history
     }
 
 #Commands
     local-history.showAll // Show all history available to select (limited with maxDisplay settings)
 
 new in version 0.0.2:
-
     local-history.showCurrent // Show current version (if history version is active)
     local-history.compareToCurrent // compare current version with another version in history
     local-history.compareToActive // compare active file with another version in history
     local-history.compareToPrevious // compare a version in history with its previous version
+
+new in version 0.0.6:
+    local-history.enabled

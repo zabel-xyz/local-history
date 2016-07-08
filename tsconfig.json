@@ -2,11 +2,13 @@
 	"compilerOptions": {
 		"module": "commonjs",
 		"target": "ES5",
-		"outDir": "out",
+		"outDir": "out/src",
 		"noLib": true,
-		"sourceMap": true
+		"sourceMap": true,
+		"watch": false
 	},
 	"exclude": [
-		"node_modules"
+		"node_modules",
+		".history"
 	]
 }
