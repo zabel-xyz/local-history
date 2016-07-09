@@ -1,6 +1,7 @@
 import {
     workspace,
     Disposable,
+    ExtensionContext,
     TextDocument,
     window,
     commands
@@ -32,19 +33,19 @@ interface IHistoryFileProperties {
 /**
 * Activate the extension.
 */
-export function activate(disposables: Disposable[]) {
+export function activate(context: ExtensionContext) {
     let controller = new HistoryController();
 
-    commands.registerCommand('local-history.showAll', controller.ShowAll, controller);
-    commands.registerCommand('local-history.showCurrent', controller.ShowCurrent, controller);
-    commands.registerCommand('local-history.compareToActive', controller.CompareToActive, controller);
-    commands.registerCommand('local-history.compareToCurrent', controller.CompareToCurrent, controller);
-    commands.registerCommand('local-history.compareToPrevious', controller.CompareToPrevious, controller);
+    context.subscriptions.push(commands.registerCommand('local-history.showAll', controller.ShowAll, controller));
+    context.subscriptions.push(commands.registerCommand('local-history.showCurrent', controller.ShowCurrent, controller));
+    context.subscriptions.push(commands.registerCommand('local-history.compareToActive', controller.CompareToActive, controller));
+    context.subscriptions.push(commands.registerCommand('local-history.compareToCurrent', controller.CompareToCurrent, controller));
+    context.subscriptions.push(commands.registerCommand('local-history.compareToPrevious', controller.CompareToPrevious, controller));
 
     // Create history on save document
     workspace.onDidSaveTextDocument(document => {
         controller.SaveRevision(document);
-    }, undefined, disposables);
+    });
 }
 
 /**
@@ -347,28 +348,6 @@ class HistoryController {
                 'Error with mkdirp: '+err.toString()+' file '+fileName);
             return false;
         }
-
-
-
-        // let paths = [],
-        //     dirs, tmp, sep;
-
-        // if (fileName.indexOf('\\')) {
-        //     dirs = fileName.split('\\');
-        //     sep = '\\';
-        // } else {
-        //     dirs = fileName.split('/');
-        //     sep = '/';
-        // }
-
-        // while (dirs.length > 1) {
-        //     paths.push(dirs.shift());
-        //     if (paths[paths.length-1].indexOf(':') < 0) {
-        //         tmp = paths.join(sep);
-        //         if (!fs.existsSync(tmp))
-        //             fs.mkdirSync(tmp);
-        //     }
-        // }
     }
 
     private getFileName(file: string): string {
