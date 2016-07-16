@@ -35,6 +35,9 @@
         },{
 			"command": "local-history.compareToPrevious",
 			"title": "Local History: Compare to previous"
+        },{
+			"command": "local-history.showViewer",
+			"title": "View: Local history"
         }],
         "configuration": {
             "type": "object",
