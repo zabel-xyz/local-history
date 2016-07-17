@@ -45,7 +45,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
 
     public compare(file1, file2: vscode.Uri, column: number) {
         if (file1 && file2)
-            this.controller.internalCompare(file1, file2, column)
+            this.controller.compare(file1, file2, column)
         else
             vscode.window.showErrorMessage('Select 2 history files to compare');
     }
@@ -56,7 +56,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
      * Provider method that takes an uri of the scheme and
      * resolves its content by creating the html document
      */
-    provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
+    public provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
         const [filename, column] = this.decodeEditor(uri);
 
         return new Promise((resolve, reject) => {
@@ -205,7 +205,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
             last;
 
         if (!(files instanceof Array)) {
-            const properties = this.controller.internalDecodeFile(files);
+            const properties = this.controller.decodeFile(files);
             let file = path.join(vscode.workspace.rootPath, properties.dir, properties.name + properties.ext);
             result += this.getHtmlFile(vscode.Uri.file(file), column, properties.name + properties.ext, current === file, true);
         } else {
@@ -218,7 +218,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
             // desc order history
             for (let index = files.length - 1, file; index >= last; index--) {
                 file = files[index];
-                const properties = this.controller.internalDecodeFile(file.fsPath);
+                const properties = this.controller.decodeFile(file.fsPath);
                 result += this.getHtmlFile(file, column, properties.date.toLocaleString(), current === file.fsPath);
             }
         }

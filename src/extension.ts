@@ -9,15 +9,15 @@ import HistoryContentProvider  from './historyContent.provider';
 export function activate(context: vscode.ExtensionContext) {
     const controller = new HistoryController();
 
-    context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.showAll', controller.ShowAll, controller));
-    context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.showCurrent', controller.ShowCurrent, controller));
-    context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.compareToActive', controller.CompareToActive, controller));
-    context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.compareToCurrent', controller.CompareToCurrent, controller));
-    context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.compareToPrevious', controller.CompareToPrevious, controller));
+    context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.showAll', controller.showAll, controller));
+    context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.showCurrent', controller.showCurrent, controller));
+    context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.compareToActive', controller.compareToActive, controller));
+    context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.compareToCurrent', controller.compareToCurrent, controller));
+    context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.compareToPrevious', controller.compareToPrevious, controller));
 
     // Create history on save document
     vscode.workspace.onDidSaveTextDocument(document => {
-        controller.SaveRevision(document);
+        controller.saveRevision(document);
     });
 
     // Show all local-history files

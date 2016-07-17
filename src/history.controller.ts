@@ -37,7 +37,7 @@ export default class HistoryController {
         this.settings = this.readSettings();
     }
 
-    public SaveRevision(document: vscode.TextDocument) {
+    public saveRevision(document: vscode.TextDocument) {
         if ((vscode.workspace.rootPath === null) || !this.settings.enabled) {
             return;
         }
@@ -100,10 +100,10 @@ export default class HistoryController {
             })
     }
 
-    public ShowAll(editor: vscode.TextEditor) {
+    public showAll(editor: vscode.TextEditor) {
         this.internalShowAll(this.actionOpen, editor);
     }
-    public ShowCurrent(editor: vscode.TextEditor) {
+    public showCurrent(editor: vscode.TextEditor) {
         if (vscode.workspace.rootPath === null)
             return;
 
@@ -113,22 +113,30 @@ export default class HistoryController {
             return this.internalOpen(this.findCurrent(document.fileName), editor.viewColumn);
     }
 
-    public CompareToActive(editor: vscode.TextEditor) {
+    public compareToActive(editor: vscode.TextEditor) {
         this.internalShowAll(this.actionCompareToActive, editor);
     }
 
-    public CompareToCurrent(editor: vscode.TextEditor) {
+    public compareToCurrent(editor: vscode.TextEditor) {
         this.internalShowAll(this.actionCompareToCurrent, editor);
     }
 
-    public CompareToPrevious(editor: vscode.TextEditor) {
+    public compareToPrevious(editor: vscode.TextEditor) {
         this.internalShowAll(this.actionCompareToPrevious, editor);
+    }
+
+    public compare(file1: vscode.Uri, file2: vscode.Uri, column?: number) {
+        return this.internalCompare(file1, file2, column);
     }
 
     public findAllHistory(fileName: string) {
         // No max, findFiles must retrive all files, and then the display is limited
         // Warning : the limitation is on a descending order
         return vscode.workspace.findFiles(this.buildRevisionPatternPath(fileName), '');
+    }
+
+    public decodeFile(filePath: string): IHistoryFileProperties {
+        return this.internalDecodeFile(filePath);
     }
 
     get maxDisplay() {
@@ -214,8 +222,8 @@ export default class HistoryController {
                     }, (err)=>reject(err));
             });
     }
-    /// TEST
-    public internalCompare(file1: vscode.Uri, file2: vscode.Uri, column?: number) {
+
+    private internalCompare(file1: vscode.Uri, file2: vscode.Uri, column?: number) {
         // cf. https://github.com/DonJayamanne/gitHistoryVSCode
         // The way the command "workbench.files.action.compareFileWith" works is:
         // It first selects the currently active editor for comparison
@@ -243,8 +251,8 @@ export default class HistoryController {
     private errorHandler(error) {
         vscode.window.showErrorMessage(error);
     }
-// TO TEST
-    public internalDecodeFile(filePath: string): IHistoryFileProperties {
+
+    private internalDecodeFile(filePath: string): IHistoryFileProperties {
         let name, dir, ext, date,
             isHistory = false;
 
