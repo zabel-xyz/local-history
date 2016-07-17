@@ -1,7 +1,6 @@
 'use strict';
 
 import * as vscode from 'vscode';
-// import ReferencesDocument from './referencesDocument';
 
 import HistoryController  from './history.controller';
 
@@ -29,10 +28,14 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
     //     return this._onDidChange.event;
     // }
 
+    // public update(uri: vscode.Uri) {
+    //     this._onDidChange.fire(uri);
+    // }
+
     public showViewer(editor: vscode.TextEditor) {
         const uri = this.encodeEditor(editor);
 
-        return vscode.commands.executeCommand('vscode.previewHtml', uri, editor.viewColumn + 1, 'Local history')
+        return vscode.commands.executeCommand('vscode.previewHtml', uri, Math.min(editor.viewColumn + 1, 3), 'Local history')
             .then(
                 (success) => {
             },  (reason) => {
@@ -40,23 +43,13 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
             });
     }
 
-    // call by html
-    // public callDiff(file1, file2) {
-    //     return vscode.commands.executeCommand('vscode.diff', vscode.Uri.file(file1), vscode.Uri.file(file2));
-    // }
-    // public callOpen(file, column) {
-    //     return vscode.commands.executeCommand('vscode.open', file, column);
-    //     //return vscode.commands.executeCommand('vscode.open', vscode.Uri.file(file), column);
-    // }
-
-    // TEST
-    public test() {
-        console.log('TEST');
+    public compare(file1, file2: vscode.Uri, column: number) {
+        if (file1 && file2)
+            this.controller.internalCompare(file1, file2, column)
+        else
+            vscode.window.showErrorMessage('Select 2 history files to compare');
     }
 
-    // public update(uri: vscode.Uri) {
-    //     this._onDidChange.fire(uri);
-    // }
 
 
     /**
@@ -68,7 +61,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
 
         return new Promise((resolve, reject) => {
 
-            this.controller.findAllHistory(filename, undefined)
+            this.controller.findAllHistory(filename)
                 .then(files => {
 
                     if (!files || !files.length) {
@@ -84,6 +77,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
                             <style>
                                 #history {
                                     border-collapse: collapse;
+                                    background-color: white;
                                     width: 90%;
                                 }
                                 #history td, #history th {
@@ -106,6 +100,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
                                     padding-bottom: 6px;
                                     text-align: left;
                                     background-color: #e5e5e5;
+                                    color: black;
                                 }
                                 #history .th-compare {
                                     width: 80px;
@@ -120,22 +115,65 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
                             </style>
 
                             <script type="text/javascript">
+                                var objects = {file1: null, file2: null},
+                                    objHRef = null;
+
+                                function initialize() {
+                                    var object = document.querySelector("input[type='checkbox']:checked");
+                                    if (object)
+                                        chkCompareClick(object);
+                                }
+
                                 function updateHRef() {
-                                    document.getElementById('hrefDiff').setAttribute('href', encodeURI('command:local-history.test?'+JSON.stringify(['toto', 1])));
+                                    var file1, file2;
+
+                                    if (objHRef === null)
+                                        objHRef = document.getElementById('diffHRef');
+
+                                    if (objects.file1 === null || objects.file1 === null) {
+                                        objHRef.setAttribute('href', encodeURI('command:local-history.compare?'));
+                                        return;
+                                    }
+
+                                    // if file1 is current version, inverse files, to be not readOnly in compare
+                                    if (objects.file1.getAttribute('data-current')) {
+                                        file1 = objects.file2;
+                                        file2 = objects.file1;
+                                    } else {
+                                        file1 = objects.file1;
+                                        file2 = objects.file2;
+                                    }
+                                    file1 = JSON.parse(decodeURI(file1.getAttribute('data-historyFile')));
+                                    file2 = JSON.parse(decodeURI(file2.getAttribute('data-historyFile')));
+
+                                    column = objHRef.getAttribute('data-column');
+                                    objHRef.setAttribute('href', encodeURI('command:local-history.compare?'+JSON.stringify([file1, file2, column])));
                                 }
 
                                 function chkCompareClick(object) {
-                                    updateHRef();
-                                    if (obj.checked) {
-                                        // some code when it is unchecked
+                                    if (object.checked) {
+                                        if (objects.file1 === null) {
+                                            objects.file1 = object;
+                                        } else {
+                                            if (objects.file2 !== null)
+                                                objects.file2.checked = false;
+                                            objects.file2 = object;
+                                        }
                                     } else {
-                                        // some other code when it is unchecked
+                                        if (object === objects.file1) {
+                                            objects.file1 = objects.file2;
+                                            objects.file2 = null;
+                                        } else if (object === objects.file2) {
+                                            objects.file2 = null;
+                                        } else
+                                            console.log('Something go wrong');
                                     }
+                                    updateHRef();
                                 }
                             </script>
 
                         </head>
-                        <body>
+                        <body onload="initialize()">
                             <H2>Local history</H1>
                             <H3>${filename}</H2>
 
@@ -146,52 +184,55 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
                                 </tr>
                                 <tr>
                                     <td>
-                                        <a href="#" id="hrefDiff">
+                                        <a href="${encodeURI('command:local-history.compare?')}" id="diffHRef" data-column="${column}">
                                             <input type="button" class="button-css" value="Compare"/>
                                         </a>
                                     </td>
                                 </tr>
-                                ${this.buildHtmlFiles(filename, column)}
-                                ${this.buildHtmlFiles(files, column)}
+                                ${this.buildHtmlFiles(filename, column, filename)}
+                                ${this.buildHtmlFiles(files, column, filename)}
                             </table>
                         </body>
                     </html>
                     `
-// a = document.getElementById('hrefDiff');
-// a.setAttribute('href', encodeURI('command:local-history.test?'+JSON.stringify(['toto', 1])));
-                                        // <button onClick="location.href='${encodeURI('command:local-history.test?'+JSON.stringify(['toto', 1]))}'">Compare</button>
-                                        // <a href="${encodeURI('command:local-history.test?'+JSON.stringify(['toto', 1]))}">Compare</a>
                     return resolve(result);
                 })
         })
     }
 
-    private buildHtmlFiles(files, column): string {
-        let result: string = '';
+    private buildHtmlFiles(files, column, current: string): string {
+        let result: string = '',
+            last;
 
         if (!(files instanceof Array)) {
             const properties = this.controller.internalDecodeFile(files);
             let file = path.join(vscode.workspace.rootPath, properties.dir, properties.name + properties.ext);
-            result += this.getHtmlFile(vscode.Uri.file(file), column, properties.name + properties.ext);
+            result += this.getHtmlFile(vscode.Uri.file(file), column, properties.name + properties.ext, current === file, true);
         } else {
+            // TODO: unlimited display
+            // show only x elements according to maxDisplay
+            if (this.controller.maxDisplay > 0 && this.controller.maxDisplay < files.length)
+                last = files.length - this.controller.maxDisplay;
+            else
+                last = 0;
             // desc order history
-            const last = files.length;
-            for (let index = files.length - 1, file; index >= 0; index--) {
+            for (let index = files.length - 1, file; index >= last; index--) {
                 file = files[index];
                 const properties = this.controller.internalDecodeFile(file.fsPath);
-                result += this.getHtmlFile(file, column, properties.date.toLocaleString());
+                result += this.getHtmlFile(file, column, properties.date.toLocaleString(), current === file.fsPath);
             }
         }
         return result;
     }
 
-    private getHtmlFile(file, column, caption): string {
-        const args = JSON.stringify([file, column]),
-              link = encodeURI(`command:vscode.open?${args}`);
+    private getHtmlFile(file, column, caption, checked, current?: boolean): string {
+        const link = encodeURI(`command:vscode.open?${JSON.stringify([file, column])}`),
+              uriFile = encodeURI(JSON.stringify(file)),
+              fileName = path.basename(file.fsPath);
         return `
             <tr>
                 <td class="compare">
-                    <input type="checkbox" onclick="chkCompareClick(this);"/>
+                    <input type="checkbox" ${checked ? 'checked' : ''} onclick="chkCompareClick(this);" data-historyFile="${uriFile}" ${current ? 'data-current="1"' : ''} />
                 </td>
                 <td>
                     <a href="${link}">${caption}</a>

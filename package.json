@@ -3,7 +3,7 @@
 	"displayName": "Local History",
 	"description": "Save files into local history",
     "publisher": "xyz",
-	"version": "0.0.6",
+	"version": "1.0.0",
 	"engines": {
 	    "vscode": "^1.0.0"
 	},

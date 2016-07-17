@@ -14,8 +14,8 @@ interface IHistorySettings {
 
 interface IHistoryActionValues {
     active: string;
-    selected: string;
-    previous: string;
+    selected: vscode.Uri;
+    previous: vscode.Uri;
 }
 
 interface IHistoryFileProperties {
@@ -100,50 +100,55 @@ export default class HistoryController {
             })
     }
 
-    public ShowAll() {
-        this.internalShowAll(this.actionOpen);
+    public ShowAll(editor: vscode.TextEditor) {
+        this.internalShowAll(this.actionOpen, editor);
     }
-    public ShowCurrent() {
+    public ShowCurrent(editor: vscode.TextEditor) {
         if (vscode.workspace.rootPath === null)
             return;
 
-        let document = (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document);
+        let document = (editor && editor.document);
 
         if (document)
-            return this.internalOpen(this.findCurrent(document.fileName));
+            return this.internalOpen(this.findCurrent(document.fileName), editor.viewColumn);
     }
 
-    public CompareToActive() {
-        this.internalShowAll(this.actionCompareToActive);
+    public CompareToActive(editor: vscode.TextEditor) {
+        this.internalShowAll(this.actionCompareToActive, editor);
     }
 
-    public CompareToCurrent() {
-        this.internalShowAll(this.actionCompareToCurrent);
+    public CompareToCurrent(editor: vscode.TextEditor) {
+        this.internalShowAll(this.actionCompareToCurrent, editor);
     }
 
-    public CompareToPrevious() {
-        this.internalShowAll(this.actionCompareToPrevious);
+    public CompareToPrevious(editor: vscode.TextEditor) {
+        this.internalShowAll(this.actionCompareToPrevious, editor);
     }
 
-    public findAllHistory(fileName: string, max: number) {
-        return vscode.workspace.findFiles(this.buildRevisionPatternPath(fileName), '', max)
+    public findAllHistory(fileName: string) {
+        // No max, findFiles must retrive all files, and then the display is limited
+        // Warning : the limitation is on a descending order
+        return vscode.workspace.findFiles(this.buildRevisionPatternPath(fileName), '');
+    }
+
+    get maxDisplay() {
+        return this.settings.maxDisplay;
     }
 
     /* private */
-    private internalShowAll(action) {
+    private internalShowAll(action, editor: vscode.TextEditor) {
 
         if (vscode.workspace.rootPath === null)
             return;
 
         let me = this,
-            document = (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document),
+            document = (editor && editor.document),
             lengthToStripOff = vscode.workspace.rootPath.length + 1;
 
         if (!document)
             return;
 
-        me.findAllHistory(document.fileName, me.settings.maxDisplay)
-        // vscode.workspace.findFiles(me.buildRevisionPatternPath(document), '', me.settings.maxDisplay)
+        me.findAllHistory(document.fileName)
             .then(files => {
 
                 if (!files || !files.length) {
@@ -151,19 +156,20 @@ export default class HistoryController {
                 }
 
                 let displayFiles = [],
-                    last = 0;
+                    last;
 
                 // show only x elements according to maxDisplay
-                // if (me.settings.maxDisplay > 0 && me.settings.maxDisplay < files.length)
-                //     last = files.length - me.settings.maxDisplay;
-                last = files.length;
+                if (me.settings.maxDisplay > 0 && me.settings.maxDisplay < files.length)
+                    last = files.length - me.settings.maxDisplay;
+                else
+                    last = 0;
                 // desc order history
                 for (let index = files.length - 1, file; index >= last; index--) {
                     file = files[index];
                     displayFiles.push({
                         description: file.fsPath.substring(lengthToStripOff),
                         label: me.getFileName(file.fsPath),
-                        filePath: file.fsPath,
+                        filePath: file,
                         previous: files[index - 1]
                     });
                 }
@@ -176,39 +182,40 @@ export default class HistoryController {
                                     selected: val.filePath,
                                     previous: val.previous
                                 };
-                            action.apply(me, [actionValues]);
+                            action.apply(me, [actionValues, editor]);
                         }
                     });
             });
     }
 
-    private actionOpen(values: IHistoryActionValues) {
-        return this.internalOpen(values.selected);
+    private actionOpen(values: IHistoryActionValues, editor: vscode.TextEditor) {
+        return this.internalOpen(values.selected, editor.viewColumn);
     }
 
-    private actionCompareToActive(values: IHistoryActionValues) {
-        return this.internalCompare(values.selected, values.active);
+    private actionCompareToActive(values: IHistoryActionValues, editor: vscode.TextEditor) {
+        return this.internalCompare(values.selected, vscode.Uri.file(values.active));
     }
 
-    private actionCompareToCurrent(values: IHistoryActionValues) {
+    private actionCompareToCurrent(values: IHistoryActionValues, editor: vscode.TextEditor) {
         return this.internalCompare(values.selected, this.findCurrent(values.active));
     }
 
-    private actionCompareToPrevious(values: IHistoryActionValues) {
+    private actionCompareToPrevious(values: IHistoryActionValues, editor: vscode.TextEditor) {
         return this.internalCompare(values.selected, values.previous);
     }
 
-    private internalOpen(filePath) {
+    private internalOpen(filePath: vscode.Uri, column: number) {
         if (filePath)
             return new Promise((resolve, reject) => {
                 vscode.workspace.openTextDocument(filePath)
                     .then(d=> {
-                        vscode.window.showTextDocument(d, vscode.window.activeTextEditor.viewColumn)
+                        vscode.window.showTextDocument(d, column)
                             .then(()=>resolve(), (err)=>reject(err))
                     }, (err)=>reject(err));
             });
     }
-    private internalCompare(file1, file2) {
+    /// TEST
+    public internalCompare(file1: vscode.Uri, file2: vscode.Uri, column?: number) {
         // cf. https://github.com/DonJayamanne/gitHistoryVSCode
         // The way the command "workbench.files.action.compareFileWith" works is:
         // It first selects the currently active editor for comparison
@@ -216,13 +223,21 @@ export default class HistoryController {
         // & as soon as a file/text document is opened, that is used as the text document for comparison
         // So, all we need to do is invoke the comparison command
         // Then open our file
-        if (file1 && file2)
-            return this.internalOpen(file1)
-                .then(() => {
-                    vscode.commands.executeCommand("workbench.files.action.compareFileWith");
-                    this.internalOpen(file2)
-                        .then(()=>{}, this.errorHandler);
-                }, this.errorHandler);
+        //
+        // Alternative use vscode.diff (same column as active)
+        //
+        if (file1 && file2) {
+            if (!column) {
+                let title = path.basename(file1.fsPath)+'<->'+path.basename(file2.fsPath);
+                vscode.commands.executeCommand("vscode.diff", file1, file2, title);
+            } else
+                return this.internalOpen(file1, column)
+                    .then(() => {
+                        vscode.commands.executeCommand("workbench.files.action.compareFileWith");
+                        this.internalOpen(file2, column)
+                            .then(()=>{}, this.errorHandler);
+                    }, this.errorHandler);
+        }
     }
 
     private errorHandler(error) {
@@ -275,17 +290,18 @@ export default class HistoryController {
                 fileProperties.name + pattern + fileProperties.ext).replace(/\\/g, '/');
     }
 
-    private findCurrent(activeFilename: string): string {
+    private findCurrent(activeFilename: string): vscode.Uri {
         let me = this,
             fileProperties = me.internalDecodeFile(activeFilename);
 
         if (fileProperties === null)
-            return activeFilename;
+            return vscode.Uri.file(activeFilename);
 
-        return path.join(
+        return vscode.Uri.file(
+            path.join(
                 vscode.workspace.rootPath,
                 fileProperties.dir,
-                fileProperties.name + fileProperties.ext).replace(/\\/g, '/');
+                fileProperties.name + fileProperties.ext).replace(/\\/g, '/'));
     }
 
     private purge(document: vscode.TextDocument) {

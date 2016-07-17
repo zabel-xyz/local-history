@@ -25,10 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(HistoryContentProvider.scheme, contentProvider));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.showViewer', contentProvider.showViewer, contentProvider));
     // Commands call by html document
-    // context.subscriptions.push(vscode.commands.registerCommand('local-history.callDiff', contentProvider.callDiff, contentProvider));
-
-    // TEST
-    context.subscriptions.push(vscode.commands.registerCommand('local-history.test', contentProvider.test, contentProvider));
+    context.subscriptions.push(vscode.commands.registerCommand('local-history.compare', contentProvider.compare, contentProvider));
 }
 
 function deactivate() {
