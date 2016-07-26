@@ -48,12 +48,12 @@ export default class HistoryController {
 
         let dir = this.getRelativePath(document.fileName),
             file;
-        if (dir !== '')
+        if (dir !== '') {
             file = path.join(
                 dir,
                 path.basename(document.fileName)
             ).substr(1).replace(/\\/g, '/');
-        else
+        } else
             file = path.basename(document.fileName);
 
         // if it's an exclude file or folder don't do anything
@@ -86,6 +86,9 @@ export default class HistoryController {
                         dir,
                         revisionFile);
                 if (me.mkDirRecursive(revisionFile))
+                    // TODO encoding
+                    // Use settings, because in api get/set encoding doesn't exist yet (see #824)
+                    // Or another solution ?
                     fs.writeFile(revisionFile, document.getText(), function(err) {
                         if (err) {
                             vscode.window.showErrorMessage(
@@ -97,7 +100,7 @@ export default class HistoryController {
                         }
                     });
 
-            })
+            });
     }
 
     public showAll(editor: vscode.TextEditor) {
@@ -125,7 +128,7 @@ export default class HistoryController {
         this.internalShowAll(this.actionCompareToPrevious, editor);
     }
 
-    public compare(file1: vscode.Uri, file2: vscode.Uri, column?: number) {
+    public compare(file1: vscode.Uri, file2: vscode.Uri, column?: string) {
         return this.internalCompare(file1, file2, column);
     }
 
@@ -167,9 +170,9 @@ export default class HistoryController {
                     last;
 
                 // show only x elements according to maxDisplay
-                if (me.settings.maxDisplay > 0 && me.settings.maxDisplay < files.length)
+                if (me.settings.maxDisplay > 0 && me.settings.maxDisplay < files.length) {
                     last = files.length - me.settings.maxDisplay;
-                else
+                } else
                     last = 0;
                 // desc order history
                 for (let index = files.length - 1, file; index >= last; index--) {
@@ -218,12 +221,12 @@ export default class HistoryController {
                 vscode.workspace.openTextDocument(filePath)
                     .then(d=> {
                         vscode.window.showTextDocument(d, column)
-                            .then(()=>resolve(), (err)=>reject(err))
+                            .then(()=>resolve(), (err)=>reject(err));
                     }, (err)=>reject(err));
             });
     }
 
-    private internalCompare(file1: vscode.Uri, file2: vscode.Uri, column?: number) {
+    private internalCompare(file1: vscode.Uri, file2: vscode.Uri, column?: string) {
         // cf. https://github.com/DonJayamanne/gitHistoryVSCode
         // The way the command "workbench.files.action.compareFileWith" works is:
         // It first selects the currently active editor for comparison
@@ -235,28 +238,41 @@ export default class HistoryController {
         // Alternative use vscode.diff (same column as active)
         //
         if (file1 && file2) {
-            if (!column) {
-                let title = path.basename(file1.fsPath)+'<->'+path.basename(file2.fsPath);
-                vscode.commands.executeCommand("vscode.diff", file1, file2, title);
-            } else
-                return this.internalOpen(file1, column)
-                    .then(() => {
-                        vscode.commands.executeCommand("workbench.files.action.compareFileWith");
-                        this.internalOpen(file2, column)
-                            .then(()=>{}, this.errorHandler);
-                    }, this.errorHandler);
+            if (column) {
+                // Set focus on the column
+                switch (Number.parseInt(column, 10)) {
+                    case 1:
+                        vscode.commands.executeCommand('workbench.action.focusFirstEditorGroup');
+                        break;
+                    case 2:
+                        vscode.commands.executeCommand('workbench.action.focusSecondEditorGroup');
+                        break;
+                    default:
+                        vscode.commands.executeCommand('workbench.action.focusThirdEditorGroup');
+                }
+            }
+            // Diff on the active column
+            let title = path.basename(file1.fsPath)+'<->'+path.basename(file2.fsPath);
+            vscode.commands.executeCommand('vscode.diff', file1, file2, title);
+
+                // this.internalOpen(file1, column)
+                //     .then(() => {
+                //         vscode.commands.executeCommand('workbench.files.action.compareFileWith');
+                //         this.internalOpen(file2, column)
+                //             .then(() => {}, this.errorHandler);
+                //     }, this.errorHandler);
         }
     }
 
-    private errorHandler(error) {
-        vscode.window.showErrorMessage(error);
-    }
+    // private errorHandler(error) {
+    //     vscode.window.showErrorMessage(error);
+    // }
 
     private internalDecodeFile(filePath: string): IHistoryFileProperties {
         let name, dir, ext, date,
             isHistory = false;
 
-        dir = this.getRelativePath(filePath),
+        dir = this.getRelativePath(filePath);
         name = path.parse(filePath).name;
         ext = path.extname(filePath);
 
@@ -280,7 +296,7 @@ export default class HistoryController {
             name: name,
             ext: ext,
             date: date
-        }
+        };
     }
 
     private buildRevisionPatternPath(fileName: string): string {
@@ -338,7 +354,7 @@ export default class HistoryController {
             });
     }
 
-    private getRelativePath(fileName: string){
+    private getRelativePath(fileName: string) {
         let dir = path.dirname(fileName),
             relative = vscode.workspace.asRelativePath(dir);
 
@@ -354,7 +370,7 @@ export default class HistoryController {
             this.mkdirp.sync(path.dirname(fileName));
             return true;
         }
-        catch(err) {
+        catch (err) {
             vscode.window.showErrorMessage(
                 'Error with mkdirp: '+err.toString()+' file '+fileName);
             return false;
@@ -377,8 +393,8 @@ export default class HistoryController {
         return {
             daysLimit: <number>config.get('daysLimit') || 30,
             maxDisplay: <number>config.get('maxDisplay') || 10,
-            exclude: <string>config.get("exclude") || "{.history,.vscode,**/node_modules,typings,out}",
-            enabled: <boolean>config.get("enabled")
-        }
+            exclude: <string>config.get('exclude') || '{.history,.vscode,**/node_modules,typings,out}',
+            enabled: <boolean>config.get('enabled')
+        };
     }
 }

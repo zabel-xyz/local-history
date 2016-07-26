@@ -28,5 +28,5 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('local-history.compare', contentProvider.compare, contentProvider));
 }
 
-function deactivate() {
-}
+// function deactivate() {
+// }

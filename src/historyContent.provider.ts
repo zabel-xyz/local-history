@@ -43,9 +43,9 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
             });
     }
 
-    public compare(file1, file2: vscode.Uri, column: number) {
+    public compare(file1, file2: vscode.Uri, column: string) {
         if (file1 && file2)
-            this.controller.compare(file1, file2, column)
+            this.controller.compare(file1, file2, column);
         else
             vscode.window.showErrorMessage('Select 2 history files to compare');
     }
@@ -130,7 +130,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
                                     if (objHRef === null)
                                         objHRef = document.getElementById('diffHRef');
 
-                                    if (objects.file1 === null || objects.file1 === null) {
+                                    if (objects.file1 === null || objects.file2 === null) {
                                         objHRef.setAttribute('href', encodeURI('command:local-history.compare?'));
                                         return;
                                     }
@@ -194,14 +194,14 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
                             </table>
                         </body>
                     </html>
-                    `
+                    `;
                     return resolve(result);
-                })
-        })
+                });
+        });
     }
 
     private buildHtmlFiles(files, column, current: string): string {
-        let result: string = '',
+        let result = '',
             last;
 
         if (!(files instanceof Array)) {
@@ -227,8 +227,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
 
     private getHtmlFile(file, column, caption, checked, current?: boolean): string {
         const link = encodeURI(`command:vscode.open?${JSON.stringify([file, column])}`),
-              uriFile = encodeURI(JSON.stringify(file)),
-              fileName = path.basename(file.fsPath);
+              uriFile = encodeURI(JSON.stringify(file));
         return `
             <tr>
                 <td class="compare">
@@ -238,7 +237,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
                     <a href="${link}">${caption}</a>
                 </td>
             </tr>
-        `
+        `;
     }
 
     private encodeEditor(editor: vscode.TextEditor): vscode.Uri {
