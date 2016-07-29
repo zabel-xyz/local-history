@@ -85,21 +85,30 @@ export default class HistoryController {
                         '.history',
                         dir,
                         revisionFile);
-                if (me.mkDirRecursive(revisionFile))
-                    // TODO encoding
-                    // Use settings, because in api get/set encoding doesn't exist yet (see #824)
-                    // Or another solution ?
-                    fs.writeFile(revisionFile, document.getText(), function(err) {
-                        if (err) {
-                            vscode.window.showErrorMessage(
-                                    'Can not save the revision of the file: '+document.fileName+
-                                    ' Error: '+ err.toString());
-                        } else {
-                            if (me.settings.daysLimit > 0)
-                                me.purge(document);
-                        }
-                    });
+                if (me.mkDirRecursive(revisionFile)) {
+                    const iconv = require('iconv-lite');
 
+                    // Convert from js string to an encoded buffer.
+                    const encoding = this.getEncoding();
+                    const text = document.getText();
+                    let buf = text;
+                    if (!encoding.startsWith('utf8')) // utf8 or utf8bom
+                        buf = iconv.encode(text, encoding);
+
+                    fs.writeFile(revisionFile, buf,
+                    // fs.writeFile(revisionFile, document.getText(), {encoding: this.getEncoding()},
+                        (err) => {
+                            if (err) {
+                                vscode.window.showErrorMessage(
+                                        'Can not save the revision of the file: '+document.fileName+
+                                        ' Error: '+ err.toString());
+                            } else {
+                                if (me.settings.daysLimit > 0)
+                                    me.purge(document);
+                            }
+                        }
+                    );
+                };
             });
     }
 
@@ -396,5 +405,12 @@ export default class HistoryController {
             exclude: <string>config.get('exclude') || '{.history,.vscode,**/node_modules,typings,out}',
             enabled: <boolean>config.get('enabled')
         };
+    }
+
+    private getEncoding(): string {
+        // Use settings, because in api get/set encoding doesn't exist yet (see #824)
+        let config = vscode.workspace.getConfiguration('files');
+        if (config)
+            return <string>config.get('encoding');
     }
 }

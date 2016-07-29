@@ -3,7 +3,7 @@
 	"displayName": "Local History",
 	"description": "Save files into local history",
     "publisher": "xyz",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"engines": {
 	    "vscode": "^1.0.0"
 	},
@@ -71,6 +71,9 @@
 		"vscode:prepublish": "node ./node_modules/vscode/bin/compile",
 		"compile": "node ./node_modules/vscode/bin/compile -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install"
+	},
+	"dependencies": {
+		"iconv-lite": "0.4.13"
 	},
 	"devDependencies": {
 		"typescript": "^1.8.10",
