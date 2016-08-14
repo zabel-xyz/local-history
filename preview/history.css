@@ -1,0 +1,37 @@
+#history {
+    border-collapse: collapse;
+    background-color: white;
+    width: 90%;
+}
+#history td, #history th {
+    border: 1px solid #ddd;
+    padding: 4px;
+}
+#history .compare {
+    vertical-align: middle;
+    text-align: center;
+}
+#history input[type='checkbox'] {
+    width: 15px;
+    height: 15px;
+}
+#history tr:nth-child(even){
+    background-color: #f2f2f2;
+}
+#history th {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    text-align: left;
+    background-color: #e5e5e5;
+    color: black;
+}
+#history .th-compare {
+    width: 80px;
+}
+#history a {
+    text-decoration: none;
+    color: black;
+}
+#history a:hover {
+    font-weight: bold;
+}

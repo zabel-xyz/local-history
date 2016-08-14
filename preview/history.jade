@@ -1,0 +1,26 @@
+doctype html
+html
+    head
+        base(href='#{baseDir}')
+        link(rel='stylesheet', href='history.css')
+        script(src='history.js')
+    body(onload='initialize()')
+        h2
+            | Local history
+            h3 #{currentFile}
+            table#history
+                thead
+                    tr
+                        th.th-compare Compare
+                        th History
+                tbody
+                    tr
+                        td
+                            a#diffHRef(href='#{compare}', data-column='#{column}')
+                                input.button-css(type='button', value='Compare')
+                    each file, i in files
+                        tr
+                            td.compare
+                                input(type='checkbox', onclick='chkCompareClick(this)', checked=(file.isChecked ? "checked" : undefined), data-historyfile='#{file.uri}', data-current='#{file.isCurrent}')
+                            td
+                                a(href='#{file.link}') #{file.caption}
