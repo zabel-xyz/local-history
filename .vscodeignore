@@ -1,10 +1,10 @@
 .vscode/**
 typings/**
-out/test/**
 **/.history/**
-test/**
+src/**
 **/*.map
 .gitignore
+.gitattributes
 tsconfig.json
-vsc-extension-quickstart.md
-$sample/**
+tslint.json
+TODO.TXT
