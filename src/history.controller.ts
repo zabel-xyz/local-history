@@ -52,7 +52,7 @@ export default class HistoryController {
             file = path.join(
                 dir,
                 path.basename(document.fileName)
-            ).substr(1).replace(/\\/g, '/');
+            ).replace(/\\/g, '/');
         } else
             file = path.basename(document.fileName);
 
@@ -285,18 +285,15 @@ export default class HistoryController {
         name = path.parse(filePath).name;
         ext = path.extname(filePath);
 
-        if (dir !== '' && (dir.startsWith('\\') || dir.startsWith('/'))) {
-            dir = dir.substr(1);
-            if (dir.startsWith('.history')) {
-                dir = dir.substr(8);
-                isHistory = true;
-                let index = name.match(/_(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
-                if (index) {
-                    date = new Date(index[1],index[2]-1,index[3],index[4],index[5],index[6]);
-                    name = name.substring(0, index.index);
-                } else
-                    return null; // file in history with bad pattern !
-            }
+        if (dir !== '' && dir.startsWith('.history')) {
+            dir = dir.substr(8);
+            isHistory = true;
+            let index = name.match(/_(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
+            if (index) {
+                date = new Date(index[1],index[2]-1,index[3],index[4],index[5],index[6]);
+                name = name.substring(0, index.index);
+            } else
+                return null; // file in history with bad pattern !
         }
 
         return {
@@ -367,10 +364,12 @@ export default class HistoryController {
         let dir = path.dirname(fileName),
             relative = vscode.workspace.asRelativePath(dir);
 
-        if (dir !== relative)
+        if (dir !== relative) {
+            if (relative !== '' && (relative.startsWith('\\') || relative.startsWith('/')))
+                relative = relative.substr(1);
             return relative;
-        else
-            return '';
+        } else
+          return '';
     }
 
     private mkDirRecursive(fileName: string): boolean {

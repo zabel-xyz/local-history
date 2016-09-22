@@ -3,7 +3,7 @@
 	"displayName": "Local History",
 	"description": "Save files into local history",
     "publisher": "xyz",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"engines": {
 	    "vscode": "^1.0.0"
 	},
@@ -16,6 +16,12 @@
 	"bugs": {
 		"url": "https://github.com/zabel-xyz/local-history/issues"
 	},
+	"keywords": [
+		"local",
+		"history",
+		"save",
+		"backup"
+	],
 	"categories": [
 	    "Other"
 	],
