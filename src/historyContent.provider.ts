@@ -103,8 +103,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
 
         if (!(files instanceof Array)) {
             const properties = this.controller.decodeFile(files);
-            let file = path.join(vscode.workspace.rootPath, properties.dir, properties.name + properties.ext);
-            return [this.getContentFile(vscode.Uri.file(file), column, properties.name + properties.ext, current === file, true)];
+            return [this.getContentFile(vscode.Uri.file(properties.file), column, properties.name + properties.ext, current === properties.file, true)];
         } else {
             let result = [],
                 last;
@@ -116,7 +115,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
                 last = 0;
             // desc order history
             for (let index = files.length - 1, file; index >= last; index--) {
-                file = files[index];
+                file = vscode.Uri.file(files[index]);
                 const properties = this.controller.decodeFile(file.fsPath);
                 result.push(this.getContentFile(file, column, properties.date.toLocaleString(), current === file.fsPath));
             }
