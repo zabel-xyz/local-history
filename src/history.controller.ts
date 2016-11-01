@@ -5,12 +5,12 @@ import * as vscode from 'vscode';
 import fs = require('fs');
 import path = require('path');
 
-const iconv = require('iconv-lite');
 const glob = require('glob');
 const mkdirp = require('mkdirp');
 
 interface IHistorySettings {
     historyPath: string;
+    internal: boolean;
     daysLimit: number;
     maxDisplay: number;
     exclude: string;
@@ -19,16 +19,15 @@ interface IHistorySettings {
 
 interface IHistoryActionValues {
     active: string;
-    selected: vscode.Uri;
-    previous: vscode.Uri;
+    selected: string;
+    previous: string;
 }
 
 interface IHistoryFileProperties {
-    isHistory: boolean;
     dir: string;
     name: string;
     ext: string;
-    file: string;
+    file?: string;
     date?: Date;
 }
 
@@ -36,8 +35,11 @@ interface IHistoryFileProperties {
  * Controller for handling history.
  */
 export default class HistoryController {
-    // private mkdirp = require('mkdirp');
+
     private settings: IHistorySettings;
+
+    private pattern = '_'+('[0-9]'.repeat(14));
+    private regExp = /_(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
 
     constructor() {
         this.settings = this.readSettings();
@@ -52,20 +54,15 @@ export default class HistoryController {
             return;
         }
 
-        let dir = this.getRelativePath(document.fileName),
-            file;
-        if (dir !== '') {
-            file = path.join(
-                dir,
-                path.basename(document.fileName)
-            ).replace(/\\/g, '/');
-        } else
-            file = path.basename(document.fileName);
+        // don't save without workspace (cause exclude is relative to workspace)
+        if (vscode.workspace.rootPath === null)
+            return;
+
+        let relativeFile = this.getRelativePath(document.fileName).replace(/\\/g, '/');
 
         // if it's an exclude file or folder don't do anything
-        vscode.workspace.findFiles(file, this.settings.exclude)
+        vscode.workspace.findFiles(relativeFile, this.settings.exclude)
             .then(files => {
-
                 // exclude file
                 if (!files || !files.length) {
                     return;
@@ -75,45 +72,28 @@ export default class HistoryController {
                 // files[0].fsPath === document.fileName
 
                 let me = this,
-                    now, revisionFile;
+                    now, revisionFile,
+                    p: path.ParsedPath;
 
                 now = new Date();
+                p = path.parse(document.fileName);
                 revisionFile =  // toto_20151213215326.js
-                        path.parse(document.fileName).name+'_'+
+                        p.name+'_'+
                         String(10000*now.getFullYear() + 100*(now.getMonth()+1) + now.getDate()) +
                         (now.getHours() < 10 ? '0' : '') +
                         String(10000*now.getHours() + 100*now.getMinutes() + now.getSeconds()) +
-                        path.extname(document.fileName);
-
+                        p.ext ;
 
                 revisionFile = path.join(
-                        this.settings.historyPath,
-                        '.history',
-                        dir,
+                        me.settings.historyPath,
+                        me.settings.internal ? path.dirname(relativeFile) : me.normalizePath(p.dir, false),
                         revisionFile);
-                if (me.mkDirRecursive(revisionFile)) {
-                    // const iconv = require('iconv-lite');
 
-                    // Convert from js string to an encoded buffer.
-                    const encoding = this.getEncoding();
-                    const text = document.getText();
-                    let buf = text;
-                    if (!encoding.startsWith('utf8')) // utf8 or utf8bom
-                        buf = iconv.encode(text, encoding);
+                if (me.mkDirRecursive(revisionFile) &&
+                    me.copyFile(document.fileName, revisionFile)) {
 
-                    fs.writeFile(revisionFile, buf,
-                    // fs.writeFile(revisionFile, document.getText(), {encoding: this.getEncoding()},
-                        (err) => {
-                            if (err) {
-                                vscode.window.showErrorMessage(
-                                        'Can not save the revision of the file: '+document.fileName+
-                                        ' Error: '+ err.toString());
-                            } else {
-                                if (me.settings.daysLimit > 0)
-                                    me.purge(document);
-                            }
-                        }
-                    );
+                    if (me.settings.daysLimit > 0)
+                        me.purge(document, revisionFile);
                 };
             });
     }
@@ -144,45 +124,50 @@ export default class HistoryController {
         return this.internalCompare(file1, file2, column);
     }
 
-    public findAllHistory(fileName: string): Thenable<string[]> {
-        // No max, findFiles must retrive all files, and then the display is limited
-        // Warning : the limitation is on a descending order
+    public findAllHistory(fileName: string, noLimit?: boolean): Thenable<string[]> {
+        let fileProperties = this.decodeFile(fileName, true);
+        return this.getHistoryFiles(fileProperties && fileProperties.file, noLimit);
+    }
 
-        fileName = this.buildRevisionPatternPath(fileName);
+    public decodeFile(filePath: string, history?: boolean): IHistoryFileProperties {
+        return this.internalDecodeFile(filePath, history);
+    }
+
+    /* private */
+    private getHistoryFiles(patternFilePath: string, noLimit?: boolean): Thenable<string[]> {
+
         // Dont's use workspace, history can be saved in another location
-        // return vscode.workspace.findFiles(fileName, '');
+        // return vscode.workspace.findFiles(patternFilePath, '');
 
         return new Promise((resolve, reject) => {
-        //    const glob = require('glob');
+            if (!patternFilePath)
+                reject('no pattern path');
+
+            // glob must use character /
             const historyPath = this.settings.historyPath.replace(/\\/g, '/');
-            glob(fileName, {cwd: historyPath}, (err, files) => {
-                if (!err)
-                    resolve(files); // return path relative to cwd
-                    // TODO: return fspath or absolute path
-                    // TODO: limitation, order...
-                else
+            glob(patternFilePath, {cwd: historyPath}, (err, files: string[]) => {
+                if (!err) {
+                    if (files && files.length) {
+                        // files are sorted in ascending order
+                        // limitation
+                        if (this.settings.maxDisplay && !noLimit)
+                            files.slice(this.settings.maxDisplay * -1);
+                        // files are absolute
+                    }
+                    resolve(files);
+                } else
                     reject(err);
             });
         });
     }
 
-    public decodeFile(filePath: string): IHistoryFileProperties {
-        return this.internalDecodeFile(filePath);
-    }
-
-    get maxDisplay() {
-        return this.settings.maxDisplay;
-    }
-
-    /* private */
     private internalShowAll(action, editor: vscode.TextEditor) {
 
         if (!this.settings.historyPath)
             return;
 
         let me = this,
-            document = (editor && editor.document),
-            lengthToStripOff = this.settings.historyPath.length + 1;
+            document = (editor && editor.document);
 
         if (!document)
             return;
@@ -194,20 +179,20 @@ export default class HistoryController {
                     return;
                 }
 
-                let displayFiles = [],
-                    last;
+                let displayFiles = [];
 
-                // show only x elements according to maxDisplay
-                if (me.settings.maxDisplay > 0 && me.settings.maxDisplay < files.length) {
-                    last = files.length - me.settings.maxDisplay;
-                } else
-                    last = 0;
                 // desc order history
-                for (let index = files.length - 1, file; index >= last; index--) {
+                let file, relative, properties, descr;
+
+                for (let index = files.length - 1; index >= 0; index--) {
                     file = files[index];
+                    relative = path.relative(me.settings.historyPath, file);
+                    descr = me.settings.internal || vscode.workspace.rootPath === null ?
+                            relative : path.relative(vscode.workspace.rootPath, me.normalizePath(relative, true));
+                    properties = me.decodeFile(file);
                     displayFiles.push({
-                        description: file.fsPath.substring(lengthToStripOff),
-                        label: me.getFileName(file.fsPath),
+                        description: descr,
+                        label: properties.date.toLocaleString(),
                         filePath: file,
                         previous: files[index - 1]
                     });
@@ -228,19 +213,19 @@ export default class HistoryController {
     }
 
     private actionOpen(values: IHistoryActionValues, editor: vscode.TextEditor) {
-        return this.internalOpen(values.selected, editor.viewColumn);
+        return this.internalOpen(vscode.Uri.file(values.selected), editor.viewColumn);
     }
 
     private actionCompareToActive(values: IHistoryActionValues, editor: vscode.TextEditor) {
-        return this.internalCompare(values.selected, vscode.Uri.file(values.active));
+        return this.internalCompare(vscode.Uri.file(values.selected), vscode.Uri.file(values.active));
     }
 
     private actionCompareToCurrent(values: IHistoryActionValues, editor: vscode.TextEditor) {
-        return this.internalCompare(values.selected, this.findCurrent(values.active));
+        return this.internalCompare(vscode.Uri.file(values.selected), this.findCurrent(values.active));
     }
 
     private actionCompareToPrevious(values: IHistoryActionValues, editor: vscode.TextEditor) {
-        return this.internalCompare(values.selected, values.previous);
+        return this.internalCompare(vscode.Uri.file(values.selected), vscode.Uri.file(values.previous));
     }
 
     private internalOpen(filePath: vscode.Uri, column: number) {
@@ -255,16 +240,6 @@ export default class HistoryController {
     }
 
     private internalCompare(file1: vscode.Uri, file2: vscode.Uri, column?: string) {
-        // cf. https://github.com/DonJayamanne/gitHistoryVSCode
-        // The way the command "workbench.files.action.compareFileWith" works is:
-        // It first selects the currently active editor for comparison
-        // Then launches the open file dropdown
-        // & as soon as a file/text document is opened, that is used as the text document for comparison
-        // So, all we need to do is invoke the comparison command
-        // Then open our file
-        //
-        // Alternative use vscode.diff (same column as active)
-        //
         if (file1 && file2) {
             if (column) {
                 // Set focus on the column
@@ -282,78 +257,91 @@ export default class HistoryController {
             // Diff on the active column
             let title = path.basename(file1.fsPath)+'<->'+path.basename(file2.fsPath);
             vscode.commands.executeCommand('vscode.diff', file1, file2, title);
-
-                // this.internalOpen(file1, column)
-                //     .then(() => {
-                //         vscode.commands.executeCommand('workbench.files.action.compareFileWith');
-                //         this.internalOpen(file2, column)
-                //             .then(() => {}, this.errorHandler);
-                //     }, this.errorHandler);
         }
     }
 
     private internalDecodeFile(filePath: string, history?: boolean): IHistoryFileProperties {
-        let name, dir, ext, date, file,
+        let me = this,
+            file, p,
+            date,
             isHistory = false;
 
-        dir = this.getRelativePath(filePath);
-        name = path.parse(filePath).name;
-        ext = path.extname(filePath);
+        p = path.parse(filePath);
 
-        if (dir !== '' && dir.startsWith('.history')) {
-            dir = dir.substr(8);
+        if (filePath.includes('/.history/') || filePath.includes('\\.history\\') ) { //startsWith(this.settings.historyPath))
             isHistory = true;
-            let index = name.match(/_(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
+            let index = p.name.match(me.regExp);
             if (index) {
                 date = new Date(index[1],index[2]-1,index[3],index[4],index[5],index[6]);
-                name = name.substring(0, index.index);
+                p.name = p.name.substring(0, index.index);
             } else
                 return null; // file in history with bad pattern !
         }
 
-        if (history)
-            file = this.joinPath('.history', dir, name, ext, '_'+('[0-9]'.repeat(14)) );
+        if (history != null) {
+            let root = '';
+
+            if (history !== isHistory) {
+                if (history === true) {
+                    root = me.settings.historyPath;
+                    if (me.settings.internal)
+                        p.dir =  path.relative(vscode.workspace.rootPath, p.dir);
+                    else
+                        p.dir = me.normalizePath(p.dir, false);
+                } else { // if (history === false)
+                    if (me.settings.internal)
+                        root = vscode.workspace.rootPath;
+                    p.dir = path.relative(me.settings.historyPath, p.dir);
+                    if (!me.settings.internal)
+                        p.dir = me.normalizePath(p.dir, true);
+                }
+            }
+            file = me.joinPath(root, p.dir, p.name, p.ext, history);
+        }
         else
-            file = this.joinPath(this.settings.historyPath, dir, name, ext);
+            file = filePath;
 
         return {
-            isHistory: isHistory,
-            dir: dir,
-            name: name,
-            ext: ext,
+            dir: p.dir,
+            name: p.name,
+            ext: p.ext,
             file: file,
             date: date
         };
     }
 
-    private joinPath(root: string, dir: string, name: string, ext: string, pattern?: string): string {
-        return path.join(root, dir, name + pattern + ext).replace(/\\/g, '/');
-    }
-
-    private buildRevisionPatternPath(fileName: string): string {
-        let fileProperties = this.internalDecodeFile(fileName, true);
-        if (fileProperties !== null)
-            return fileProperties.file;
-        else
-            return;
+    private joinPath(root: string, dir: string, name: string, ext: string, history: boolean): string {
+        let pattern = history === true ? this.pattern : '';
+        return path.join(root, dir, name + pattern + ext);
     }
 
     private findCurrent(activeFilename: string): vscode.Uri {
         if (!this.settings.historyPath)
           return vscode.Uri.file(activeFilename);
 
-        let fileProperties = this.internalDecodeFile(activeFilename);
+        let fileProperties = this.decodeFile(activeFilename, false);
         if (fileProperties !== null)
             return vscode.Uri.file(fileProperties.file);
         else
             return vscode.Uri.file(activeFilename);
     }
 
-    private purge(document: vscode.TextDocument) {
-        let me = this;
+    private purge(document: vscode.TextDocument, historyFile?: string) {
+        let me = this,
+            dir, name, ext,
+            pattern;
 
-        // TODO : better search ?
-        me.findAllHistory(document.fileName)
+        if (historyFile) {
+            dir = path.dirname(historyFile);
+            ext = path.extname(document.fileName);
+            name = path.basename(document.fileName, ext);
+            pattern = me.joinPath('', dir, name, ext, true);
+        } else {
+            let fileProperties = this.decodeFile(document.fileName, true);
+            pattern = fileProperties && fileProperties.file;
+        }
+
+        me.getHistoryFiles(pattern, true)
             .then(files => {
 
                 if (!files || !files.length) {
@@ -361,8 +349,8 @@ export default class HistoryController {
                 }
 
                 let stat: fs.Stats,
-                    now: Number = new Date().getTime(),
-                    endTime: Number;
+                    now: number = new Date().getTime(),
+                    endTime: number;
 
                 for (let file of files) {
                     stat = fs.statSync(file);
@@ -377,47 +365,64 @@ export default class HistoryController {
     }
 
     private getRelativePath(fileName: string) {
-        let dir = path.dirname(fileName),
-            relative = vscode.workspace.asRelativePath(dir);
+        let relative = vscode.workspace.asRelativePath(fileName);
 
-        if (dir !== relative) {
-            if (relative !== '' && (relative.startsWith('\\') || relative.startsWith('/')))
-                relative = relative.substr(1);
+        if (fileName !== relative) {
             return relative;
         } else
-          return '';
+            return path.basename(fileName);
+    }
+
+    private normalizePath(dir: string, absolute: boolean) {
+        if (process.platform === 'win32') {
+            if (!absolute) {
+                // on windows remove drive 1st character ':'
+                let p = path.parse(dir);
+                if (p.root.includes(':'))
+                    // use path.join() to not suppress last directory
+                    return path.join(p.dir.replace(':', ''), p.name);
+            } else {
+                if (dir.indexOf('\\') === 1)
+                    return dir.replace('\\', ':\\'); // on windows add character : to drive
+            }
+        }
+        return dir;
     }
 
     private mkDirRecursive(fileName: string): boolean {
-
         try {
-            let filePath = path.dirname(fileName);
-            if (!fs.existsSync(filePath))
-                mkdirp.sync(path.dirname(filePath));
+            mkdirp.sync(path.dirname(fileName));
             return true;
         }
         catch (err) {
-            vscode.window.showErrorMessage(
-                'Error with mkdirp: '+err.toString()+' file '+fileName);
+            vscode.window.showErrorMessage(`Error with mkdir: '${err.toString()}' file '${fileName}`);
             return false;
         }
     }
 
-    private getFileName(file: string): string {
-         let forwardSlash = file.lastIndexOf('/'),
-             backSlash = file.lastIndexOf('\\');
-
-         if (forwardSlash === -1 && backSlash === -1) {
-             return file;
-         }
-         return file.substring((forwardSlash > backSlash) ? forwardSlash + 1 : backSlash + 1);
-     }
+    private copyFile(source, target): boolean {
+        try {
+            fs.writeFileSync(target, fs.readFileSync(source));
+            return true;
+        }
+        catch (err) {
+            vscode.window.showErrorMessage(`Error with copyFile: '${err.toString()} ${source} => ${target}`);
+            return false;
+        }
+    }
 
     private readSettings(): IHistorySettings {
-        let config = vscode.workspace.getConfiguration('local-history');
+        let config = vscode.workspace.getConfiguration('local-history'),
+            historyPath = <string>config.get('path') || vscode.workspace.rootPath || '';
+
+        // add folder .history
+        // in windows replace / by \ (character returns by all node functions)
+        if (historyPath)
+            historyPath = path.join(historyPath, '.history').replace(/\//g, path.sep);
 
         return {
-            historyPath: <string>config.get('path') || vscode.workspace.rootPath,
+            historyPath: historyPath,
+            internal: historyPath.startsWith(vscode.workspace.rootPath), // rootPath use character \ in windows
             daysLimit: <number>config.get('daysLimit') || 30,
             maxDisplay: <number>config.get('maxDisplay') || 10,
             exclude: <string>config.get('exclude') || '{.history,.vscode,**/node_modules,typings,out}',
@@ -425,10 +430,4 @@ export default class HistoryController {
         };
     }
 
-    private getEncoding(): string {
-        // Use settings, because in api get/set encoding doesn't exist yet (see #824)
-        let config = vscode.workspace.getConfiguration('files');
-        if (config)
-            return <string>config.get('encoding');
-    }
 }

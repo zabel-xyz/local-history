@@ -67,6 +67,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
 
         return new Promise((resolve, reject) => {
 
+            // TODO nolimit = true
             this.controller.findAllHistory(filename)
                 .then(files => {
 
@@ -100,24 +101,19 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
     }
 
     private buildContentFiles(files, column, current: string): IHistoryContentFile[] {
+        let properties;
 
         if (!(files instanceof Array)) {
-            const properties = this.controller.decodeFile(files);
+            properties = this.controller.decodeFile(files, false);
             return [this.getContentFile(vscode.Uri.file(properties.file), column, properties.name + properties.ext, current === properties.file, true)];
         } else {
-            let result = [],
-                last;
-            // TODO: unlimited display
-            // show only x elements according to maxDisplay
-            if (this.controller.maxDisplay > 0 && this.controller.maxDisplay < files.length)
-                last = files.length - this.controller.maxDisplay;
-            else
-                last = 0;
+            let result = [];
+
             // desc order history
-            for (let index = files.length - 1, file; index >= last; index--) {
-                file = vscode.Uri.file(files[index]);
-                const properties = this.controller.decodeFile(file.fsPath);
-                result.push(this.getContentFile(file, column, properties.date.toLocaleString(), current === file.fsPath));
+            for (let index = files.length - 1, file; index >= 0; index--) {
+                file = files[index].replace(/\//g, path.sep);
+                properties = this.controller.decodeFile(file);
+                result.push(this.getContentFile(vscode.Uri.file(properties.file), column, properties.date.toLocaleString(), current === properties.file));
             }
             return result;
         }
