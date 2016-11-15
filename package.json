@@ -3,9 +3,9 @@
 	"displayName": "Local History",
 	"description": "Save files into local history",
     "publisher": "xyz",
-	"version": "1.0.2",
+	"version": "1.1.0",
 	"engines": {
-	    "vscode": "^1.0.0"
+        "vscode": "^1.5.0"
 	},
     "icon": "local-history.png",
     "homepage": "https://github.com/zabel-xyz/local-history",
@@ -76,16 +76,17 @@
  		}
 	},
 	"main": "./out/src/extension",
-	"scripts": {
-		"vscode:prepublish": "node ./node_modules/vscode/bin/compile",
-		"compile": "node ./node_modules/vscode/bin/compile -p ./",
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install"
-	},
+    },
 	"dependencies": {
 		"iconv-lite": "0.4.13"
 	},
 	"devDependencies": {
-		"typescript": "^1.8.10",
-		"vscode":  "^0.11.14"
+        "typescript": "^2.0.3",
+        "vscode": "^1.0.0",
+        "@types/node": "^6.0.40"
 	}
 }
