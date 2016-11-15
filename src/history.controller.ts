@@ -64,7 +64,7 @@ export default class HistoryController {
         if (vscode.workspace.rootPath === null)
             return;
 
-        // fix for 1.7.1 : use charater \ with findFiles to work with subfolder in windows
+        // fix for 1.7.1 : use charater \ with findFiles to work with subfolder in windows #15424
         let relativeFile = this.getRelativePath(document.fileName).replace(/\//g, path.sep);
 
         // if it's an exclude file or folder don't do anything
