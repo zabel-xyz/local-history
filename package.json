@@ -71,6 +71,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Is save in local history enabled"
+				},
+				"local-history.path": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Specify a location for .history folder (null: use workspaceRoot)"
 				}
             }
  		}
@@ -81,9 +86,11 @@
         "compile": "tsc -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install"
     },
-	"dependencies": {
-		"iconv-lite": "0.4.13"
-	},
+    "dependencies": {
+        "glob": "^7.1.1",
+        "jade": "^1.11.0",
+        "mkdirp": "^0.5.1"
+    },
 	"devDependencies": {
         "typescript": "^2.0.3",
         "vscode": "^1.0.0",

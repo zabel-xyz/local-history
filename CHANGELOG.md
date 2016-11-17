@@ -2,7 +2,7 @@
 * New setting `local-history.path` to specify another location for .history folder [#4](https://github.com/zabel-xyz/local-history/issues/4)
 * Fix an issue: history files can no longer be save in a deep-level structure (vscode 1.7.1, windows)
   (caused by vscode.workspace.findfiles) [#5](https://github.com/zabel-xyz/local-history/issues/5)
-
+* Use new version of TypeScript, VSCode, vsce...
 
 ## 1.0.2
 * Fix an issue with vscode.workspace.asRelativePath (vscode 1.6)
