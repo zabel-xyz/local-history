@@ -1,4 +1,4 @@
-## Local History
+# Local History
 
 A visual source code plugin for maintaining local history of files.
 
@@ -13,9 +13,9 @@ e.g., `.history/foo/bar/myFile_20151212205930.ts`
 To easily navigate between history files, use the html-document.
 You access to this document with the command `View: Local history`
 
-![Image of Debugging](https://raw.githubusercontent.com/zabel-xyz/local-history/master/HtmlPreview.png)
+![Image of Debugging](images/HtmlPreview.png)
 
-#Settings
+## Settings
 
         "local-history.daysLimit":  30, // A day number to purge local history. (0: no purge)
         "local-history.maxDisplay": 10, // A max files to display with local history commands
@@ -26,7 +26,7 @@ new in version 1.1.0:
 
         "local-history.path":  // Specify another location for .history folder (null: use workspaceRoot)
 
-#Commands
+## Commands
 
     local-history.showAll // Show all history available to select (limited with maxDisplay settings)
 
@@ -40,3 +40,8 @@ new in version 0.0.2:
 new in version 1.0.0:
 
     local-history.showViewer // Show the history in a html document
+
+## Note
+When .history folder is stored in workspace, you can add a "files.exclude". This hides .history folder and avoids some issues. (e.g. csproj extension)  
+Thanks to @pabloarista (issue [#13](https://github.com/zabel-xyz/local-history/issues/13))
+

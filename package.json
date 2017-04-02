@@ -3,11 +3,11 @@
 	"displayName": "Local History",
 	"description": "Save files into local history",
     "publisher": "xyz",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"engines": {
         "vscode": "^1.5.0"
 	},
-    "icon": "local-history.png",
+    "icon": "images/local-history.png",
     "homepage": "https://github.com/zabel-xyz/local-history",
     "repository": {
         "type": "git",
