@@ -1,3 +1,6 @@
+## 1.1.1
+* Fix issue with no workspace [#12](https://github.com/zabel-xyz/local-history/issues/12)
+
 ## 1.1.0
 * New setting `local-history.path` to specify another location for .history folder [#4](https://github.com/zabel-xyz/local-history/issues/4)
 * Fix an issue: history files can no longer be save in a deep-level structure (vscode 1.7.1, windows)

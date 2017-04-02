@@ -61,7 +61,7 @@ export default class HistoryController {
         }
 
         // don't save without workspace (cause exclude is relative to workspace)
-        if (vscode.workspace.rootPath === null)
+        if (vscode.workspace.rootPath == null)
             return;
 
         // fix for 1.7.1 : use charater \ with findFiles to work with subfolder in windows #15424
@@ -395,7 +395,7 @@ export default class HistoryController {
             historyPath,
             saveMode = EHistorySaveMode.None;
 
-        if (vscode.workspace.rootPath !== null) {
+        if (vscode.workspace.rootPath != null) {
             historyPath = <string>config.get('path');
             if (historyPath) {
                 historyPath = path.join (
