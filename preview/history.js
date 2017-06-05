@@ -1,10 +1,19 @@
+document.addEventListener('DOMContentLoaded',
+    function () {
+        document.querySelectorAll('.check-compare').forEach((elem) => {
+            elem.addEventListener('click', chkCompareClick);
+        });
+        initialize();
+    }
+);
+
 var objects = {file1: null, file2: null},
     objHRef = null;
 
 function initialize() {
     var object = document.querySelector("input[type='checkbox']:checked");
     if (object)
-        chkCompareClick(object);
+        chkCompare(object);
 }
 
 function updateHRef() {
@@ -33,7 +42,11 @@ function updateHRef() {
     objHRef.setAttribute('href', encodeURI('command:local-history.compare?'+JSON.stringify([file1, file2, column])));
 }
 
-function chkCompareClick(object) {
+function chkCompareClick(event) {
+    chkCompare(event.target);
+}
+
+function chkCompare(object) {
     if (object.checked) {
         if (objects.file1 === null) {
             objects.file1 = object;

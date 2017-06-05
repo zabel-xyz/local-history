@@ -70,7 +70,6 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
             const [filename, column] = this.decodeEditor(uri);
             const settings = this.contentSettings.get(uri.toString());
 
-            // TODO security
             this.controller.findAllHistory(filename, (settings && settings.all) || false)
                 .then(fileProperties => {
                     const files = fileProperties.history;

@@ -3,6 +3,7 @@
 * Replace jade by pug
 * Improve html viewer (display settings, add buttons, ...)
 * Refresh html viewer when save file (if viewer is visible)
+* Compare: force current file on right part to allow edition
 * Use new version of TypeScript, VSCode, vsce...
 
 ## 1.1.1
