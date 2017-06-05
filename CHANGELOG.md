@@ -1,3 +1,10 @@
+## 1.2.1
+* Fix issue with variables like %AppData% in local-history.path [#15](https://github.com/zabel-xyz/local-history/issues/15)
+* Replace jade by pug
+* Improve html viewer (display settings, add buttons, ...)
+* Refresh html viewer when save file (if viewer is visible)
+* Use new version of TypeScript, VSCode, vsce...
+
 ## 1.1.1
 * Fix issue with no workspace [#12](https://github.com/zabel-xyz/local-history/issues/12)
 

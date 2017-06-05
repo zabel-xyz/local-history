@@ -26,8 +26,8 @@ function updateHRef() {
         file1 = objects.file1;
         file2 = objects.file2;
     }
-    file1 = JSON.parse(decodeURI(file1.getAttribute('data-historyFile')));
-    file2 = JSON.parse(decodeURI(file2.getAttribute('data-historyFile')));
+    file1 = JSON.parse(file1.getAttribute('data-historyFile'));
+    file2 = JSON.parse(file2.getAttribute('data-historyFile'));
 
     column = objHRef.getAttribute('data-column');
     objHRef.setAttribute('href', encodeURI('command:local-history.compare?'+JSON.stringify([file1, file2, column])));

@@ -1,5 +1,3 @@
-'use strict';
-
 import * as vscode from 'vscode';
 
 import fs = require('fs');
@@ -35,6 +33,7 @@ interface IHistoryFileProperties {
     ext: string;
     file?: string;
     date?: Date;
+    history?: string[];
 }
 
 /**
@@ -51,18 +50,20 @@ export default class HistoryController {
         this.settings = this.readSettings();
     }
 
-    public saveRevision(document: vscode.TextDocument) {
+    public saveRevision(document: vscode.TextDocument): Promise<vscode.TextDocument> {
+        return new Promise((resolve, reject) => {
+
         if (this.settings.saveMode === EHistorySaveMode.None || !this.settings.enabled) {
-            return;
+            return resolve();
         }
 
         if (!(document && /*document.isDirty &&*/ document.fileName)) {
-            return;
+            return resolve();
         }
 
         // don't save without workspace (cause exclude is relative to workspace)
         if (vscode.workspace.rootPath == null)
-            return;
+            return resolve();
 
         // fix for 1.7.1 : use charater \ with findFiles to work with subfolder in windows #15424
         let relativeFile = this.getRelativePath(document.fileName).replace(/\//g, path.sep);
@@ -72,7 +73,7 @@ export default class HistoryController {
             .then(files => {
                 // exclude file
                 if (!files || !files.length) {
-                    return;
+                    return resolve();
                 }
 
                 // files.length must be 1 and
@@ -101,8 +102,11 @@ export default class HistoryController {
 
                     if (me.settings.daysLimit > 0)
                         me.purge(document, revisionFile);
-                };
+                    return resolve(document);
+                } else
+                    return reject('Error occured');
             });
+        });
     }
 
     public showAll(editor: vscode.TextEditor) {
@@ -131,17 +135,46 @@ export default class HistoryController {
         return this.internalCompare(file1, file2, column);
     }
 
-    public findAllHistory(fileName: string, noLimit?: boolean): Thenable<string[]> {
+    public findAllHistory(fileName: string, noLimit?: boolean): Promise<IHistoryFileProperties> {
         let fileProperties = this.decodeFile(fileName, true);
-        return this.getHistoryFiles(fileProperties && fileProperties.file, noLimit);
+        return new Promise((resolve, reject) => {
+            this.getHistoryFiles(fileProperties && fileProperties.file, noLimit)
+                .then(files => {
+                    fileProperties.history = files;
+                    resolve(fileProperties);
+                })
+                .catch(err => reject(err));
+        });
     }
 
     public decodeFile(filePath: string, history?: boolean): IHistoryFileProperties {
         return this.internalDecodeFile(filePath, history);
     }
 
+    public getHistoryPath(): string {
+        return this.settings.historyPath;
+    }
+
+    public deleteFile(fileName: string): Promise<void> {
+        const me = this;
+        return new Promise<void>((resolve, reject) => {
+            me.internalDeleteHistory([fileName])
+                .then(() => resolve())
+                .catch((err) => reject());
+        });
+    }
+    public deleteHistory(fileName: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            const fileProperties = this.decodeFile(fileName, true);
+            this.getHistoryFiles(fileProperties && fileProperties.file, true)
+                .then((files) => this.internalDeleteHistory(files))
+                .then(() => resolve())
+                .catch((err) => reject());
+        });
+    }
+
     /* private */
-    private getHistoryFiles(patternFilePath: string, noLimit?: boolean): Thenable<string[]> {
+    private getHistoryFiles(patternFilePath: string, noLimit?: boolean):  Promise<string[]> {
 
         return new Promise((resolve, reject) => {
             if (!patternFilePath)
@@ -177,7 +210,8 @@ export default class HistoryController {
             return;
 
         me.findAllHistory(document.fileName)
-            .then(files => {
+            .then(fileProperties => {
+                const files = fileProperties.history;
 
                 if (!files || !files.length) {
                     return;
@@ -226,7 +260,8 @@ export default class HistoryController {
     }
 
     private actionCompareToPrevious(values: IHistoryActionValues, editor: vscode.TextEditor) {
-        return this.internalCompare(vscode.Uri.file(values.selected), vscode.Uri.file(values.previous));
+        if (values.previous)
+            return this.internalCompare(vscode.Uri.file(values.selected), vscode.Uri.file(values.previous));
     }
 
     private internalOpen(filePath: vscode.Uri, column: number) {
@@ -321,6 +356,34 @@ export default class HistoryController {
             return vscode.Uri.file(activeFilename);
     }
 
+    private internalDeleteFile(fileName: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            fs.unlink(fileName, err => {
+                if (err)
+                    // Not reject to avoid Promise.All to stop
+                    return resolve({fileName: fileName, err: err});
+                return resolve(fileName);
+            });
+        });
+    }
+
+    private internalDeleteHistory(fileNames: string[]): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            Promise.all(fileNames.map(file => this.internalDeleteFile(file)))
+                .then(results => {
+                    // Afficher la 1ère erreur
+                    results.some((item: any) => {
+                        if (item.err) {
+                            vscode.window.showErrorMessage(`Error when delete files history: '${item.err}' file '${item.fileName}`);
+                            return true;
+                        }
+                    });
+                    resolve();
+                })
+                .catch(() => reject());
+        });
+    }
+
     private purge(document: vscode.TextDocument, historyFile?: string) {
         let me = this,
             dir, name, ext,
@@ -398,6 +461,8 @@ export default class HistoryController {
         if (vscode.workspace.rootPath != null) {
             historyPath = <string>config.get('path');
             if (historyPath) {
+                // replace variables like %AppData%
+                historyPath = historyPath.replace(/%([^%]+)%/g, (_, key) => process.env[key]);
                 historyPath = path.join (
                     historyPath,
                     '.history',

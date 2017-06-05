@@ -1,3 +1,68 @@
+#title {
+    border-bottom: 1px solid #2c2c2c;
+    line-height: 1;
+    margin-bottom: 0;
+    padding-bottom: 6px;
+}
+
+#settings {
+	float: left;
+    font-size: small;
+    opacity: 0.8;
+}
+#settings dt {
+	clear: left;
+	float: left;
+	width: 120px;
+    font-style: italic;
+}
+#settings dd {
+	float: left;
+    margin-left: 0;
+	width: 300px;
+}
+
+.button {
+    background-color: #f2f2f2;
+    cursor: pointer;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #ddd;
+    border-radius: 3px;
+}
+.button:hover {
+    background-color: #e5e5e5;
+}
+
+.button-img {
+    background-repeat: no-repeat;
+    background-size: 16px;
+    background-position: 50%;
+    padding: 12px 12px;
+    margin-right: 4px;
+}
+
+.bar.button {
+    margin-bottom: 6px;
+}
+
+.button-img.refresh{
+    background-image: url("images/refresh.png");
+}
+.button-img.more{
+    background-image: url("images/more.png");
+}
+.button-img.deleteAll{
+    background-image: url("images/deleteAll.png");
+}
+.button-img.compare{
+    background-image: url("images/diff.png");
+}
+.button-img.delete{
+    background-image: url("images/delete.png");
+}
+
+
 #history {
     border-collapse: collapse;
     background-color: white;
@@ -5,7 +70,7 @@
 }
 #history td, #history th {
     border: 1px solid #ddd;
-    padding: 4px;
+    padding: 2px 4px;
 }
 #history .compare {
     vertical-align: middle;
@@ -14,6 +79,7 @@
 #history input[type='checkbox'] {
     width: 15px;
     height: 15px;
+    cursor: pointer;
 }
 #history tr:nth-child(even){
     background-color: #f2f2f2;
@@ -26,8 +92,17 @@
     color: black;
 }
 #history .th-compare {
-    width: 80px;
+    width: 60px;
 }
+#history .th-delete {
+    width: 60px;
+}
+
+#history a button {
+    display: block;
+    margin: auto;
+}
+
 #history a {
     text-decoration: none;
     color: black;
@@ -35,3 +110,4 @@
 #history a:hover {
     font-weight: bold;
 }
+

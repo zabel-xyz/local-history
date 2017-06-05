@@ -15,17 +15,24 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.compareToCurrent', controller.compareToCurrent, controller));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.compareToPrevious', controller.compareToPrevious, controller));
 
-    // Create history on save document
-    vscode.workspace.onDidSaveTextDocument(document => {
-        controller.saveRevision(document);
-    });
-
     // Show all local-history files
     const contentProvider = new HistoryContentProvider(controller);
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(HistoryContentProvider.scheme, contentProvider));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('local-history.showViewer', contentProvider.showViewer, contentProvider));
     // Commands call by html document
     context.subscriptions.push(vscode.commands.registerCommand('local-history.compare', contentProvider.compare, contentProvider));
+    context.subscriptions.push(vscode.commands.registerCommand('local-history.refresh', contentProvider.refresh, contentProvider));
+    context.subscriptions.push(vscode.commands.registerCommand('local-history.delete', contentProvider.delete, contentProvider));
+
+    // Create history on save document
+    vscode.workspace.onDidSaveTextDocument(document => {
+        controller.saveRevision(document)
+            .then ((saveDocument) => {
+                // refresh viewer (if any)
+                if (saveDocument)
+                    contentProvider.refreshDocument(saveDocument);
+            });
+    });
 }
 
 // function deactivate() {
