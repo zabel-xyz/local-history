@@ -84,12 +84,12 @@ export default class HistoryController {
                     p: path.ParsedPath;
 
                 now = new Date();
+                now = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+                now = now.toISOString().substring(0, 19).replace(/[-:T]/g, '');
                 p = path.parse(document.fileName);
                 revisionFile =  // toto_20151213215326.js
                         p.name+'_'+
-                        String(10000*now.getFullYear() + 100*(now.getMonth()+1) + now.getDate()) +
-                        (now.getHours() < 10 ? '0' : '') +
-                        String(10000*now.getHours() + 100*now.getMinutes() + now.getSeconds()) +
+                        now +
                         p.ext ;
 
                 revisionFile = path.join(
