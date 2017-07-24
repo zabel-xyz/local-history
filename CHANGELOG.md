@@ -1,3 +1,5 @@
+## 1.3.0
+* Add first file version, before changed format `.history/foo/bar/myFile_00000000000000.t`
 ## 1.2.1
 * Fix issue with variables like %AppData% in local-history.path [#15](https://github.com/zabel-xyz/local-history/issues/15)
 * Replace jade by pug

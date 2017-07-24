@@ -109,6 +109,63 @@ export default class HistoryController {
         });
     }
 
+    public saveFirstRevision(document: vscode.TextDocument): Promise<vscode.TextDocument> {
+        return new Promise((resolve, reject) => {
+
+        if (this.settings.saveMode === EHistorySaveMode.None || !this.settings.enabled) {
+            return resolve();
+        }
+
+        if (!(document && /*document.isDirty &&*/ document.fileName)) {
+            return resolve();
+        }
+
+        // don't save without workspace (cause exclude is relative to workspace)
+        if (vscode.workspace.rootPath == null)
+            return resolve();
+
+        // fix for 1.7.1 : use charater \ with findFiles to work with subfolder in windows #15424
+        let relativeFile = this.getRelativePath(document.fileName).replace(/\//g, path.sep);
+
+        // if it's an exclude file or folder don't do anything
+        vscode.workspace.findFiles(relativeFile, this.settings.exclude)
+            .then(files => {
+                // exclude file
+                if (!files || !files.length) {
+                    return resolve();
+                }
+
+                // files.length must be 1 and
+                // files[0].fsPath === document.fileName
+
+                let me = this,
+                    now, revisionFile,
+                    p: path.ParsedPath;
+
+                now = new Date();
+                p = path.parse(document.fileName);
+                revisionFile =  p.name + '_00000000000000' + p.ext;
+
+                revisionFile = path.join(
+                        me.settings.historyPath,
+                        path.dirname(relativeFile),
+                        revisionFile);
+
+                fs.stat(revisionFile, (err, stats) => {
+                    if (stats && stats.isFile()) {//file exists
+                        return resolve(document);
+                    }
+                    else {
+                        if (me.mkDirRecursive(revisionFile) &&
+                            me.copyFile(document.fileName, revisionFile)) {
+                            return resolve(document);
+                        }else return reject('Error occured');
+                    }
+                });
+                return resolve(document);
+            });
+        });
+    }
     public showAll(editor: vscode.TextEditor) {
         this.internalShowAll(this.actionOpen, editor);
     }
@@ -371,7 +428,7 @@ export default class HistoryController {
         return new Promise<void>((resolve, reject) => {
             Promise.all(fileNames.map(file => this.internalDeleteFile(file)))
                 .then(results => {
-                    // Afficher la 1ère erreur
+                    // Afficher la 1ï¿½re erreur
                     results.some((item: any) => {
                         if (item.err) {
                             vscode.window.showErrorMessage(`Error when delete files history: '${item.err}' file '${item.fileName}`);
