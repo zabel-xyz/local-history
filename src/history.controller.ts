@@ -128,7 +128,7 @@ export default class HistoryController {
         let relativeFile = this.getRelativePath(document.fileName).replace(/\//g, path.sep);
 
         // if it's an exclude file or folder don't do anything
-        vscode.workspace.findFiles(relativeFile, this.settings.exclude)
+        return vscode.workspace.findFiles(relativeFile, this.settings.exclude)
             .then(files => {
                 // exclude file
                 if (!files || !files.length) {
