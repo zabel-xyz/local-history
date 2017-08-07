@@ -46,16 +46,13 @@ export default class HistoryController {
                 return resolve();
             }
 
-            const now = new Date(),
-                  p = path.parse(document.fileName);
+            let now = new Date();
+            now = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+            now = now.toISOString().substring(0, 19).replace(/[-:T]/g, '');
 
-            let revisionFile =  // toto_20151213215326.js
-                    p.name+'_'+
-                    String(10000*now.getFullYear() + 100*(now.getMonth()+1) + now.getDate()) +
-                    (now.getHours() < 10 ? '0' : '') +
-                    String(10000*now.getHours() + 100*now.getMinutes() + now.getSeconds()) +
-                    p.ext;
-
+            const p = path.parse(document.fileName),                                
+                  revisionFile = `${p.name}_${now}${p.ext}`;  // toto_20151213215326.js
+                        
             if (!settings.absolute) {
                 const relativeFile = this.getRelativePath(document.fileName).replace(/\//g, path.sep);
                 revisionFile = path.join(
@@ -371,7 +368,7 @@ export default class HistoryController {
         return new Promise<void>((resolve, reject) => {
             Promise.all(fileNames.map(file => this.internalDeleteFile(file)))
                 .then(results => {
-                    // Afficher la 1ère erreur
+                    // Afficher la 1Ã¨re erreur
                     results.some((item: any) => {
                         if (item.err) {
                             vscode.window.showErrorMessage(`Error when delete files history: '${item.err}' file '${item.fileName}`);
