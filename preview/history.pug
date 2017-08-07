@@ -21,10 +21,12 @@ html
 
         a#refresh(href=encodeURI('command:local-history.refresh?'+JSON.stringify([providerUri])), title='Refresh')
             button.bar.button.button-img.refresh(type='button')
-        a#more(href=encodeURI('command:local-history.refresh?'+JSON.stringify([providerUri, true])), title='See more history')
-            button.bar.button.button-img.more(type='button')
-        a#deleteAll(href=encodeURI('command:local-history.delete?'+JSON.stringify([providerUri, currentFile, true])), title='Delete all files from history')
-            button.bar.button.button-img.deleteAll(type='button')
+
+        if (files && files.length)
+            a#more(href=encodeURI('command:local-history.refresh?'+JSON.stringify([providerUri, true])), title='See more history')
+                button.bar.button.button-img.more(type='button')
+            a#deleteAll(href=encodeURI('command:local-history.delete?'+JSON.stringify([providerUri, currentFile, true])), title='Delete all files from history')
+                button.bar.button.button-img.deleteAll(type='button')
 
         if (!files || !files.length)
             div No history

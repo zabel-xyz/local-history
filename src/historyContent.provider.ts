@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import HistoryController  from './history.controller';
+import {IHistorySettings} from './history.settings';
 
 import path = require('path');
 
@@ -68,30 +69,32 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
         return new Promise((resolve, reject) => {
 
             const [filename, column] = this.decodeEditor(uri);
-            const settings = this.contentSettings.get(uri.toString());
+            const contentSettings = this.contentSettings.get(uri.toString());
+            const settings = this.controller.getSettings(vscode.Uri.file(filename));
 
-            this.controller.findAllHistory(filename, (settings && settings.all) || false)
+            this.controller.findAllHistory(filename, settings, (contentSettings && contentSettings.all) || false)
                 .then(fileProperties => {
-                    const files = fileProperties.history;
+                    const files = fileProperties && fileProperties.history;
                     let contentFiles = [];
 
                     if (files && files.length) {
-                        contentFiles = contentFiles.concat(this.buildContentFiles(filename, column, filename));
-                        contentFiles = contentFiles.concat(this.buildContentFiles(files, column, filename));
+                        contentFiles = contentFiles.concat(this.buildContentFiles(filename, column, filename, settings));
+                        contentFiles = contentFiles.concat(this.buildContentFiles(files, column, filename, settings));
                     }
 
                     // __dirname = out/src
                     const dirname = path.join(__dirname, '../../preview');
+                    const currentFile = vscode.Uri.file(filename);
 
                     const pug = require('pug');
                     pug.renderFile(path.join(dirname, 'history.pug'), {
                         baseDir: path.join(dirname,'/'),
-                        currentFile: vscode.Uri.file(filename),
-                        currentSearch: path.relative(this.controller.getHistoryPath(), fileProperties.file),
+                        currentFile: currentFile,
+                        currentSearch: settings.enabled ? path.relative(settings.historyPath, fileProperties.file) : 'none',
                         column: column,
                         files: contentFiles,
-                        workspaceRoot: vscode.workspace.rootPath,
-                        historyPath: this.controller.getHistoryPath(),
+                        workspaceRoot: settings.folder ? settings.folder.fsPath : 'none',
+                        historyPath: settings.historyPath,
                         providerUri: uri
                     }, function(err, html) {
                         if (err) {
@@ -108,11 +111,11 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
         });
     }
 
-    private buildContentFiles(files, column, current: string): IHistoryContentFile[] {
+    private buildContentFiles(files, column, current: string, settings: IHistorySettings): IHistoryContentFile[] {
         let properties;
 
         if (!(files instanceof Array)) {
-            properties = this.controller.decodeFile(files, false);
+            properties = this.controller.decodeFile(files, settings, false);
             return [this.getContentFile(properties.file, column, properties.name + properties.ext, current === properties.file, true)];
         } else {
             let result = [];
@@ -120,7 +123,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
             // desc order history
             for (let index = files.length - 1, file; index >= 0; index--) {
                 file = files[index].replace(/\//g, path.sep);
-                properties = this.controller.decodeFile(file);
+                properties = this.controller.decodeFile(file, settings);
                 result.push(this.getContentFile(properties.file, column, properties.date.toLocaleString(), current === properties.file));
             }
             return result;
