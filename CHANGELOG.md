@@ -1,4 +1,6 @@
 ## 1.3.0
+### Bugs Fixed
+* Fix file naming generation, length under 14 chars [#18](https://github.com/zabel-xyz/local-history/issues/18)
 ### Breaking changes
 * Setting `enabled` is a number (previously boolean) <BR>
   (0: never, 1: always, 2: limited to workspaceFolder)

@@ -46,13 +46,15 @@ export default class HistoryController {
                 return resolve();
             }
 
-            let now = new Date();
-            now = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
-            now = now.toISOString().substring(0, 19).replace(/[-:T]/g, '');
+            let now = new Date(),
+                nowInfo;
 
-            const p = path.parse(document.fileName),                                
-                  revisionFile = `${p.name}_${now}${p.ext}`;  // toto_20151213215326.js
-                        
+            now = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+            nowInfo = now.toISOString().substring(0, 19).replace(/[-:T]/g, '');
+
+            const p = path.parse(document.fileName);
+            let   revisionFile = `${p.name}_${nowInfo}${p.ext}`;  // toto_20151213215326.js
+
             if (!settings.absolute) {
                 const relativeFile = this.getRelativePath(document.fileName).replace(/\//g, path.sep);
                 revisionFile = path.join(
