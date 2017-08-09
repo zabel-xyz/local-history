@@ -24,6 +24,16 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('local-history.refresh', contentProvider.refresh, contentProvider));
     context.subscriptions.push(vscode.commands.registerCommand('local-history.delete', contentProvider.delete, contentProvider));
 
+    // Create first history before save document
+    vscode.workspace.onWillSaveTextDocument(e => {
+        const document = e.document;
+        e.waitUntil(
+            controller.saveFirstRevision(document)
+                .then((saveDocument) => {
+                // refresh viewer (if any)
+            })
+        );
+    });
     // Create history on save document
     vscode.workspace.onDidSaveTextDocument(document => {
         controller.saveRevision(document)
