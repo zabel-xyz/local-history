@@ -1,5 +1,18 @@
 ## 1.3.0
 * Add first file version, before changed format `.history/foo/bar/myFile_00000000000000.t`
+=======
+### Bugs fixed
+* Fix file naming generation, length under 14 chars [#18](https://github.com/zabel-xyz/local-history/issues/18)
+### Breaking changes
+* Setting `enabled` is a number (previously boolean) <BR>
+  (0: never, 1: always, 2: limited to workspaceFolder)
+* Setting `exclude` is an array (previously string) <BR>
+  array of folder or files to not save (glob)
+### New features
+* Save single files, without workspacefolder [#8](https://github.com/zabel-xyz/local-history/issues/8)
+* Setting `absolute` to allow saving absolute path in `local-history.path` [#16](https://github.com/zabel-xyz/local-history/issues/16)
+### Other changes
+* The minimum supported version of VS Code is now 1.14.0
 ## 1.2.1
 * Fix issue with variables like %AppData% in local-history.path [#15](https://github.com/zabel-xyz/local-history/issues/15)
 * Replace jade by pug
