@@ -32,7 +32,12 @@ export class HistorySettings {
     public get(file: vscode.Uri) {
 
         // Find workspaceFolder corresponding to file
-        // const folder = vscode.workspace.getWorkspaceFolder(file); // TODO multi-root
+        let folder;
+        const wsFolder = vscode.workspace.getWorkspaceFolder(file);
+        if (wsFolder)
+            folder = wsFolder.uri;
+
+        /*
         let folder = vscode.workspace.rootPath ? vscode.Uri.file(vscode.workspace.rootPath) : undefined;
         if (folder) {
             // if file is not a child of workspace => undefined
@@ -40,6 +45,7 @@ export class HistorySettings {
             if (relativeFile === file.fsPath.replace(/\\/g, '/'))
                 folder = undefined;
         }
+        */
 
         let settings = this.settings.find((value, index, obj) => {
             if (folder && value.folder)
@@ -48,7 +54,7 @@ export class HistorySettings {
                 return (folder === value.folder);
         });
         if (!settings) {
-            settings = this.read(folder);
+            settings = this.read(folder, file);
             this.settings.push(settings);
         }
         return settings;
@@ -65,9 +71,9 @@ export class HistorySettings {
        saved in vscode.getworkspacefolder\.history\<relative>
        (no workspacefolder => not saved)
     */
-    private read(workspacefolder: vscode.Uri): IHistorySettings {
+    private read(workspacefolder: vscode.Uri, file: vscode.Uri): IHistorySettings {
 
-        let config = vscode.workspace.getConfiguration('local-history'),
+        let config = vscode.workspace.getConfiguration('local-history', file),
             enabled = <EHistoryEnabled>config.get('enabled'),
             exclude =  <string[]>config.get('exclude'),
             historyPath,

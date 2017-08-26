@@ -3,9 +3,9 @@
 	"displayName": "Local History",
 	"description": "Save files into local history",
     "publisher": "xyz",
-	"version": "1.3.0",
+	"version": "1.4.0",
 	"engines": {
-        "vscode": "^1.14.0"
+        "vscode": "^1.15.0"
 	},
     "icon": "images/local-history.png",
     "homepage": "https://github.com/zabel-xyz/local-history",
@@ -64,7 +64,14 @@
                 },
                 "local-history.exclude": {
                     "type": "array",
-                    "default": ["**/.history/**", "**/.vscode/**", "**/node_modules/**", "**/typings/**", "**/out/**"],
+                    "default": [
+                        "**/.history/**",
+                        "**/.vscode/**",
+                        "**/node_modules/**",
+                        "**/typings/**",
+                        "**/out/**",
+                        "**/Code/User/**"
+                    ],
                     "description": "Files or folder to not save"
                 },
 				"local-history.enabled": {

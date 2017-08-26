@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import fs = require('fs');
 import path = require('path');
 import {IHistorySettings, HistorySettings} from './history.settings';
+import Timeout from './timeout';
 
 const glob = require('glob');
 const mkdirp = require('mkdirp');
@@ -37,44 +38,16 @@ export default class HistoryController {
         this.settings = new HistorySettings();
     }
 
+    public saveFirstRevision(document: vscode.TextDocument) {
+        // Put a timeout of 1000 ms, cause vscode wait until a delay and then continue the saving.
+        // Timeout avoid to save a wrong version, because it's to late and vscode has already saved the file.
+        // (if an error occured 3 times this code will not be called anymore.)
+        // cf. https://github.com/Microsoft/vscode/blob/master/src/vs/workbench/api/node/extHostDocumentSaveParticipant.ts
+        return this.internalSave(document, true, new Timeout(1000));
+    }
+
     public saveRevision(document: vscode.TextDocument): Promise<vscode.TextDocument> {
-        return new Promise((resolve, reject) => {
-
-            const settings = this.getSettings(document.uri);
-
-            if (!this.allowSave(settings, document)) {
-                return resolve();
-            }
-
-            let now = new Date(),
-                nowInfo;
-
-            now = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
-            nowInfo = now.toISOString().substring(0, 19).replace(/[-:T]/g, '');
-
-            const p = path.parse(document.fileName);
-            let   revisionFile = `${p.name}_${nowInfo}${p.ext}`;  // toto_20151213215326.js
-
-            if (!settings.absolute) {
-                const relativeFile = this.getRelativePath(document.fileName).replace(/\//g, path.sep);
-                revisionFile = path.join(
-                        settings.historyPath,
-                        path.dirname(relativeFile),
-                        revisionFile);
-            } else {
-                revisionFile = path.join(
-                        settings.historyPath,
-                        this.normalizePath(path.dirname(document.fileName), false),
-                        revisionFile);
-            }
-
-            if (this.mkDirRecursive(revisionFile) && this.copyFile(document.fileName, revisionFile)) {
-                if (settings.daysLimit > 0)
-                    this.purge(document, settings, revisionFile);
-                return resolve(document);
-            } else
-                return reject('Error occured');
-        });
+        return this.internalSave(document);
     }
 
     public showAll(editor: vscode.TextEditor) {
@@ -147,6 +120,62 @@ export default class HistoryController {
     }
 
     /* private */
+    private internalSave(document: vscode.TextDocument, isOriginal?: boolean, timeout?: Timeout): Promise<vscode.TextDocument> {
+
+        return new Promise((resolve, reject) => {
+
+            const settings = this.getSettings(document.uri);
+
+            if (!this.allowSave(settings, document)) {
+                return resolve();
+            }
+
+            let revisionDir;
+            if (!settings.absolute) {
+                revisionDir = path.dirname(this.getRelativePath(document.fileName).replace(/\//g, path.sep));
+            } else {
+                revisionDir = this.normalizePath(path.dirname(document.fileName), false);
+            }
+
+            const p = path.parse(document.fileName);
+            const revisionPattern = this.joinPath(settings.historyPath, revisionDir, p.name, p.ext);     // toto_[0-9]...
+
+            if (isOriginal) {
+                // if already some files exists, don't save an original version (cause: the really original version is lost) !
+                // (Often the case...)
+                const files = glob.sync(revisionPattern, {cwd: settings.historyPath.replace(/\\/g, '/')});
+                if (files && files.length > 0)
+                    return resolve();
+
+                if (timeout && timeout.isTimedOut()) {
+                    vscode.window.showErrorMessage(`Timeout when internalSave: ' ${document.fileName}`);
+                    return reject('timedout');
+                }
+            }
+
+            let now = new Date(),
+                nowInfo;
+            if (isOriginal) {
+                // find original date (if any)
+                const state = fs.statSync(document.fileName);
+                if (state)
+                    now = state.mtime;
+            }
+            // remove 1 sec to original version, to avoid same name as currently version
+            now = new Date(now.getTime() - (now.getTimezoneOffset() * 60000) - (isOriginal ? 1000 : 0));
+            nowInfo = now.toISOString().substring(0, 19).replace(/[-:T]/g, '');
+
+            const revisionFile = this.joinPath(settings.historyPath, revisionDir, p.name, p.ext, `_${nowInfo}`); // toto_20151213215326.js
+
+            if (this.mkDirRecursive(revisionFile) && this.copyFile(document.fileName, revisionFile, timeout)) {
+                if (settings.daysLimit > 0 && !isOriginal)
+                    this.purge(document, settings, revisionPattern);
+                return resolve(document);
+            } else
+                return reject('Error occured');
+        });
+    }
+
     private allowSave(settings: IHistorySettings, document: vscode.TextDocument): boolean {
         if (!settings.enabled) {
             return false;
@@ -325,7 +354,7 @@ export default class HistoryController {
                     }
                 }
             }
-            file = me.joinPath(root, p.dir, p.name, p.ext, history);
+            file = me.joinPath(root, p.dir, p.name, p.ext, history ? undefined : '' );
         }
         else
             file = filePath;
@@ -339,8 +368,7 @@ export default class HistoryController {
         };
     }
 
-    private joinPath(root: string, dir: string, name: string, ext: string, history: boolean): string {
-        let pattern = history === true ? this.pattern : '';
+    private joinPath(root: string, dir: string, name: string, ext: string, pattern: string = this.pattern): string {
         return path.join(root, dir, name + pattern + ext);
     }
 
@@ -383,20 +411,8 @@ export default class HistoryController {
         });
     }
 
-    private purge(document: vscode.TextDocument, settings: IHistorySettings, historyFile?: string) {
-        let me = this,
-            dir, name, ext,
-            pattern;
-
-        if (historyFile) {
-            dir = path.dirname(historyFile);
-            ext = path.extname(document.fileName);
-            name = path.basename(document.fileName, ext);
-            pattern = me.joinPath('', dir, name, ext, true);
-        } else {
-            let fileProperties = this.decodeFile(document.fileName, settings, true);
-            pattern = fileProperties && fileProperties.file;
-        }
+    private purge(document: vscode.TextDocument, settings: IHistorySettings, pattern: string) {
+        let me = this;
 
         me.getHistoryFiles(pattern, settings, true)
             .then(files => {
@@ -422,9 +438,7 @@ export default class HistoryController {
     }
 
     private getRelativePath(fileName: string) {
-        // TODO: multi-root
-        // let relative = vscode.workspace.asRelativePath(fileName, false);
-        let relative = vscode.workspace.asRelativePath(fileName);
+        let relative = vscode.workspace.asRelativePath(fileName, false);
 
         if (fileName !== relative) {
             return relative;
@@ -443,9 +457,16 @@ export default class HistoryController {
         }
     }
 
-    private copyFile(source, target): boolean {
+    private copyFile(source: string, target: string, timeout?: Timeout): boolean {
         try {
-            fs.writeFileSync(target, fs.readFileSync(source));
+            let buffer;
+            buffer = fs.readFileSync(source);
+
+            if (timeout && timeout.isTimedOut()) {
+                vscode.window.showErrorMessage(`Timeout when copyFile: ' ${source} => ${target}`);
+                return false;
+            }
+            fs.writeFileSync(target, buffer);
             return true;
         }
         catch (err) {
