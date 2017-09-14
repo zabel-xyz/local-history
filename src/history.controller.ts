@@ -15,7 +15,7 @@ interface IHistoryActionValues {
     previous: string;
 }
 
-interface IHistoryFileProperties {
+export interface IHistoryFileProperties {
     dir: string;
     name: string;
     ext: string;
@@ -27,7 +27,7 @@ interface IHistoryFileProperties {
 /**
  * Controller for handling history.
  */
-export default class HistoryController {
+export class HistoryController {
 
     private settings: HistorySettings;
 
@@ -101,13 +101,17 @@ export default class HistoryController {
     }
 
     public deleteFile(fileName: string): Promise<void> {
-        const me = this;
+        return this.deleteFiles([fileName]);
+    }
+
+    public deleteFiles(fileNames: string[]): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            me.internalDeleteHistory([fileName])
+            this.internalDeleteHistory(fileNames)
                 .then(() => resolve())
                 .catch((err) => reject());
         });
     }
+
     public deleteHistory(fileName: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             const settings = this.getSettings(vscode.Uri.file(fileName));
@@ -398,7 +402,7 @@ export default class HistoryController {
         return new Promise<void>((resolve, reject) => {
             Promise.all(fileNames.map(file => this.internalDeleteFile(file)))
                 .then(results => {
-                    // Afficher la 1ère erreur
+                    // Display 1st error
                     results.some((item: any) => {
                         if (item.err) {
                             vscode.window.showErrorMessage(`Error when delete files history: '${item.err}' file '${item.fileName}`);

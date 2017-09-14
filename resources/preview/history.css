@@ -1,3 +1,8 @@
+#body {
+    background-color: white;
+    color: black;
+}
+
 #title {
     border-bottom: 1px solid #2c2c2c;
     line-height: 1;
@@ -47,19 +52,19 @@
 }
 
 .button-img.refresh{
-    background-image: url("images/refresh.png");
+    background-image: url("../images/light/refresh.png");
 }
 .button-img.more{
-    background-image: url("images/more.png");
+    background-image: url("../images/light/more.png");
 }
 .button-img.deleteAll{
-    background-image: url("images/deleteAll.png");
+    background-image: url("../images/light/deleteAll.png");
 }
 .button-img.compare{
-    background-image: url("images/diff.png");
+    background-image: url("../images/light/diff.png");
 }
 .button-img.delete{
-    background-image: url("images/delete.png");
+    background-image: url("../images/light/delete.png");
 }
 
 

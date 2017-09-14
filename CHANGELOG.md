@@ -1,3 +1,6 @@
+##1.5.0
+* Displays a local-history tree in the explorer pane [#21] (https://github.com/zabel-xyz/local-history/issues/21)
+
 ##1.4.0
 * Add first file version [#9-#19] (https://github.com/zabel-xyz/local-history/issues/19)
 * The minimum supported version of VS Code is now 1.15.0 (to support multi-root)

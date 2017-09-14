@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import HistoryController  from './history.controller';
+import {HistoryController}  from './history.controller';
 import {IHistorySettings} from './history.settings';
 
 import path = require('path');
@@ -83,7 +83,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
                     }
 
                     // __dirname = out/src
-                    const dirname = path.join(__dirname, '../../preview');
+                    const dirname = path.join(__dirname, '../../resources/preview');
                     const currentFile = vscode.Uri.file(filename);
 
                     const pug = require('pug');

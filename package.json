@@ -3,7 +3,7 @@
 	"displayName": "Local History",
 	"description": "Save files into local history",
     "publisher": "xyz",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"engines": {
         "vscode": "^1.15.0"
 	},
@@ -29,7 +29,53 @@
 	    "*"
 	],
 	"contributes": {
-	    "commands": [{
+        "views": {
+            "explorer": [{
+                "id": "treeLocalHistory",
+                "name": "Local history"
+            }]
+        },
+	    "commands": [
+
+        {
+            "command": "treeLocalHistory.refresh",
+            "title": "Refresh",
+            "icon": {
+                "light": "resources/images/light/refresh.png",
+                "dark": "resources/images/dark/refresh.png"
+            }
+        },{
+            "command": "treeLocalHistory.more",
+            "title": "See more history",
+            "icon": {
+                "light": "resources/images/light/more.png",
+                "dark": "resources/images/dark/more.png"
+            }
+        },{
+            "command": "treeLocalHistory.deleteAll",
+            "title": "Delete all files from history",
+            "icon": {
+                "light": "resources/images/light/deleteAll.png",
+                "dark": "resources/images/dark/deleteAll.png"
+            }
+        },{
+            "command": "treeLocalHistory.showSideEntry",
+            "title": "Open to the side"
+        },{
+            "command": "treeLocalHistory.deleteEntry",
+            "title": "Delete"
+        },{
+            "command": "treeLocalHistory.compareToCurrentEntry",
+            "title": "Compare with current"
+        },{
+            "command": "treeLocalHistory.selectEntry",
+            "title": "Select for compare"
+        },{
+            "command": "treeLocalHistory.compareEntry",
+            "title": "Compare with selection"
+        },
+
+        {
 		    "command": "local-history.showAll",
 		    "title": "Local History: Show all"
         },{
@@ -48,6 +94,49 @@
 			"command": "local-history.showViewer",
 			"title": "View: Local history"
         }],
+
+        "menus": {
+			"view/title": [{
+                "command": "treeLocalHistory.refresh",
+                "when": "view == treeLocalHistory",
+                "group": "navigation@1"
+            },{
+                "command": "treeLocalHistory.more",
+                "when": "view == treeLocalHistory",
+                "group": "navigation@2"
+            },{
+                "command": "treeLocalHistory.deleteAll",
+                "when": "view == treeLocalHistory",
+                "group": "navigation@3"
+            }],
+            "view/item/context": [{
+                "command": "treeLocalHistory.showSideEntry",
+                "when": "view == treeLocalHistory && viewItem == localHistoryItem",
+                "group": "1_tree-navigation@1"
+            },{
+                "command": "treeLocalHistory.compareToCurrentEntry",
+                "when": "view == treeLocalHistory && viewItem == localHistoryItem",
+                "group": "2_tree-compare@1"
+            },{
+                "command": "treeLocalHistory.selectEntry",
+                "when": "view == treeLocalHistory && viewItem == localHistoryItem",
+                "group": "2_tree-compare@2"
+            },{
+                "command": "treeLocalHistory.compareEntry",
+                "when": "view == treeLocalHistory && viewItem == localHistoryItem",
+                "group": "2_tree-compare@3"
+            },{
+                "command": "treeLocalHistory.deleteEntry",
+                "when": "view == treeLocalHistory && viewItem == localHistoryItem",
+                "group": "3_tree-action@1"
+            },{
+                "command": "treeLocalHistory.deleteEntry",
+                "when": "view == treeLocalHistory && viewItem == localHistoryGrp",
+                "group": "3_tree-action@1"
+            }
+        ]
+        },
+
         "configuration": {
             "type": "object",
             "title": "Local history configuration",
