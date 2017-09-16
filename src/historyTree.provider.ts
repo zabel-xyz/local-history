@@ -24,6 +24,7 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
     private tree = {};  // {yesterday: {grp: HistoryItem, items: HistoryItem[]}}
     private selection: HistoryItem;
     private noLimit = false;
+    private date;
 
     public readonly selectIconPath = {
         light: path.join(__filename, '..', '..', '..', 'resources', 'images', 'light', 'selection.png'),
@@ -125,24 +126,37 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
     }
 
     private getRelativeDate(fileDate: Date) {
-        const delta = Math.round((new Date().getTime() - fileDate.getTime()) / 1000);
         const hour = 60 * 60,
               day = hour * 24,
-              week = day * 7,
-              month = day * 30;
+              ref = fileDate.getTime() / 1000;
 
-        const now = new Date();
-        if (delta < hour)
+        if (!this.date) {
+            const dt = new Date(),
+                  now =  dt.getTime() / 1000,
+                  today = dt.setHours(0,0,0,0) / 1000; // clear current hour
+            this.date = {
+                now:  now,
+                today: today,
+                week: today - ((dt.getDay() || 7) - 1) * day, //  1st day of week (week start monday)
+                month: dt.setDate(1) / 1000,        // 1st day of current month
+                eLastMonth: dt.setDate(0) / 1000,          // last day of previous month
+                lastMonth: dt.setDate(1) / 1000     // 1st day of previous month
+            }
+        }
+
+        if (this.date.now - ref < hour)
             return 'In the last hour'
-        else if (delta < day)
+        else if (ref > this.date.today)
             return 'Today'
-        else if (delta < 2*day)
+        else if (ref > this.date.today - day)
             return 'Yesterday'
-        else if (delta < week)
+        else if (ref > this.date.week)
+            return 'This week'
+        else if (ref > this.date.week - (day * 7))
             return 'Last week'
-        else if (delta < month)
+        else if (ref > this.date.month)
             return 'This month'
-        else if (delta < month * 2)
+        else if (ref > this.date.lastMonth)
             return 'Last month'
         else
             return 'Older'
@@ -173,6 +187,7 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
         this.noLimit = noLimit;
         delete this.currentHistoryFile;
         delete this.historyFiles;
+        delete this.date;
         this._onDidChangeTreeData.fire();
     }
 

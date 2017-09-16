@@ -10,10 +10,15 @@ Each file revision is stored in a separate file inside the .history folder of yo
 (you can also configure another location, see local-history.path).
 e.g., `.history/foo/bar/myFile_20151212205930.ts`
 
-To easily navigate between history files, use the html-document.
-You access to this document with the command `View: Local history`
+You can easily navigate between history files with the `local-history tree` in the explorer pane.<BR>
+When you click on a file, a comparaison with the current version is displayed.<BR>
+You can also access other commands via a context menu.<BR>
 
-![Image of Debugging](images/HtmlPreview.png)
+![Image of tree](images/Tree.png)
+
+There is also an html-document (command: `View: Local history`)
+
+![Image of html](images/HtmlPreview.png)
 
 ## Settings
 

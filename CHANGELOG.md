@@ -1,3 +1,6 @@
+##1.5.1
+* Fix calculate relative date
+
 ##1.5.0
 * Displays a local-history tree in the explorer pane [#21](https://github.com/zabel-xyz/local-history/issues/21)
 
