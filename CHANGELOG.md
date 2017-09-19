@@ -1,3 +1,6 @@
+##1.5.2
+* Fix error "Cannot read property 'document' of undefined" when opening a folder
+
 ##1.5.1
 * Fix calculate relative date
 

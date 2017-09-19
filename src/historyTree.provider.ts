@@ -58,6 +58,10 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
 
             if (!element) { // root
                 if (!this.historyFiles) {
+
+                    if (!vscode.window.activeTextEditor || !vscode.window.activeTextEditor.document)
+                        return resolve(items);
+
                     const filename = vscode.window.activeTextEditor.document.uri;
                     const settings = this.controller.getSettings(filename);
                     this.loadHistoryFile(filename, settings)
@@ -69,11 +73,13 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
                     items = this.loadHistoryGroups(this.historyFiles);
                     resolve(items);
                 }
-            } else if (element.kind === EHistoryTreeItem.Group) {
-                this.historyFiles[element.label].forEach((file) => {
-                    items.push(new HistoryItem(file.date.toLocaleString(), vscode.Uri.file(file.file), element.label));
-                });
-                this.tree[element.label].items = items;
+            } else {
+                if (element.kind === EHistoryTreeItem.Group) {
+                    this.historyFiles[element.label].forEach((file) => {
+                        items.push(new HistoryItem(file.date.toLocaleString(), vscode.Uri.file(file.file), element.label));
+                    });
+                    this.tree[element.label].items = items;
+                }
                 resolve(items);
             }
         });
