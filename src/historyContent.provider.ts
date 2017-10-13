@@ -124,7 +124,7 @@ export default class HistoryContentProvider implements vscode.TextDocumentConten
             for (let index = files.length - 1, file; index >= 0; index--) {
                 file = files[index].replace(/\//g, path.sep);
                 properties = this.controller.decodeFile(file, settings);
-                result.push(this.getContentFile(properties.file, column, properties.date.toLocaleString(), current === properties.file));
+                result.push(this.getContentFile(properties.file, column, properties.date.toLocaleString(settings.dateLocale), current === properties.file));
             }
             return result;
         }

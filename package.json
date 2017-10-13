@@ -3,7 +3,7 @@
 	"displayName": "Local History",
 	"description": "Save files into local history",
     "publisher": "xyz",
-	"version": "1.5.2",
+	"version": "1.6.0",
 	"engines": {
         "vscode": "^1.15.0"
 	},
@@ -53,7 +53,7 @@
             }
         },{
             "command": "treeLocalHistory.deleteAll",
-            "title": "Delete all files from history",
+            "title": "Delete history for current file",
             "icon": {
                 "light": "resources/images/light/deleteAll.png",
                 "dark": "resources/images/dark/deleteAll.png"
@@ -141,6 +141,11 @@
             "type": "object",
             "title": "Local history configuration",
             "properties": {
+                "local-history.saveDelay": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "Controls the delay in seconds after which local-history is saved. To avoid too many history files."
+                },
                 "local-history.daysLimit": {
                     "type": "number",
                     "default": 30,
@@ -151,6 +156,13 @@
                     "default": 10,
                     "description": "A max files to display"
                 },
+
+                "local-history.dateLocale": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Specify locale to use when displaying date"
+                },
+
                 "local-history.exclude": {
                     "type": "array",
                     "default": [

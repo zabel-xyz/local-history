@@ -22,8 +22,10 @@ There is also an html-document (command: `View: Local history`)
 
 ## Settings
 
-        "local-history.daysLimit":  30, // A day number to purge local history. (0: no purge)
-        "local-history.maxDisplay": 10, // A max files to display with local history commands
+        "local-history.daysLimit":  30  // A day number to purge local history. (0: no purge)
+        "local-history.maxDisplay": 10  // A max files to display with local history commands
+        "local-history.saveDelay":   0  // A delay in seconds to save file in local history. {0: no delay}
+        "local-history.dateLocale":     // The locale to use when displaying date
 
         "local-history.path":     // Specify another location for .history folder (null: use workspaceFolder)
         "local-history.absolute": // Save absolute or relative path in local-history.path

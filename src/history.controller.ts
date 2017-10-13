@@ -30,12 +30,14 @@ export interface IHistoryFileProperties {
 export class HistoryController {
 
     private settings: HistorySettings;
+    private saveBatch;
 
     private pattern = '_'+('[0-9]'.repeat(14));
     private regExp = /_(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
 
     constructor() {
         this.settings = new HistorySettings();
+        this.saveBatch = new Map();
     }
 
     public saveFirstRevision(document: vscode.TextDocument) {
@@ -126,13 +128,35 @@ export class HistoryController {
     /* private */
     private internalSave(document: vscode.TextDocument, isOriginal?: boolean, timeout?: Timeout): Promise<vscode.TextDocument> {
 
+        const settings = this.getSettings(document.uri);
+
+        if (!this.allowSave(settings, document)) {
+            return Promise.resolve(undefined);
+        }
+
+        if (!isOriginal && settings.saveDelay) {
+            if (!this.saveBatch.get(document.fileName)) {
+                this.saveBatch.set(document.fileName, document);
+                return this.timeoutPromise(this.internalSaveDocument, settings.saveDelay * 1000, [document, settings]);
+            } else return Promise.reject(undefined); // waiting
+        }
+
+        return this.internalSaveDocument(document, settings, isOriginal, timeout);
+    }
+
+    private timeoutPromise(f, delay, args): Promise<any> {
         return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                f.apply(this, args)
+                    .then(value => resolve(value))
+                    .catch(value => reject(value));
+            }, delay);
+        });
+    }
 
-            const settings = this.getSettings(document.uri);
+    private internalSaveDocument(document: vscode.TextDocument, settings: IHistorySettings, isOriginal?: boolean, timeout?: Timeout): Promise<vscode.TextDocument> {
 
-            if (!this.allowSave(settings, document)) {
-                return resolve();
-            }
+        return new Promise((resolve, reject) => {
 
             let revisionDir;
             if (!settings.absolute) {
@@ -156,6 +180,8 @@ export class HistoryController {
                     return reject('timedout');
                 }
             }
+            else if (settings.saveDelay)
+                this.saveBatch.delete(document.fileName);
 
             let now = new Date(),
                 nowInfo;
@@ -251,7 +277,7 @@ export class HistoryController {
                     properties = me.decodeFile(file, settings);
                     displayFiles.push({
                         description: relative,
-                        label: properties.date.toLocaleString(),
+                        label: properties.date.toLocaleString(settings.dateLocale),
                         filePath: file,
                         previous: files[index - 1]
                     });

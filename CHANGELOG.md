@@ -1,3 +1,11 @@
+##1.6.0
+### Bugs fixed
+* Fix delete file history in treeView.
+### New features
+* New setting `local-history.saveDelay` to add a delay (in seconds) on history generation.
+According to request [#20](https://github.com/zabel-xyz/local-history/issues/20)
+* New setting `local-history.dateLocale` to specify the locale to use when displaying date
+
 ##1.5.2
 * Fix error "Cannot read property 'document' of undefined" when opening a folder
 

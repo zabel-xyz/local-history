@@ -24,7 +24,8 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
     private tree = {};  // {yesterday: {grp: HistoryItem, items: HistoryItem[]}}
     private selection: HistoryItem;
     private noLimit = false;
-    private date;
+    private date;   // calculs result of relative date against now()
+    private format; // function to format against locale
 
     public readonly selectIconPath = {
         light: path.join(__filename, '..', '..', '..', 'resources', 'images', 'light', 'selection.png'),
@@ -76,7 +77,7 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
             } else {
                 if (element.kind === EHistoryTreeItem.Group) {
                     this.historyFiles[element.label].forEach((file) => {
-                        items.push(new HistoryItem(file.date.toLocaleString(), vscode.Uri.file(file.file), element.label));
+                        items.push(new HistoryItem(this.format(file), vscode.Uri.file(file.file), element.label));
                     });
                     this.tree[element.label].items = items;
                 }
@@ -94,22 +95,23 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
                     this.currentHistoryFile = historyFile && historyFile.file;
                     // History files
                     this.historyFiles = {};
+                    this.format = (file) => file.date.toLocaleString(settings.dateLocale);
+                    let grp = 'new';
                     const files = fileProperties && fileProperties.history;
-                    let grp;
-                    if (files && files.length) {
-                        for (let index = files.length - 1, file; index >= 0; index--) {
-                            file = this.controller.decodeFile(files[index], settings)
-                            if (grp !== 'Older') {
-                                grp = this.getRelativeDate(file.date);
-                                if (!this.historyFiles[grp])
-                                this.historyFiles[grp] = [file]
-                                else
-                                this.historyFiles[grp].push(file);
-                            } else {
-                                this.historyFiles[grp].push(file);
-                            }
-                        }
-                    }
+                    if (files && files.length)
+                        files.reverse()
+                             .map(file => this.controller.decodeFile(file, settings))
+                             .forEach(file => {
+                                if (grp !== 'Older') {
+                                    grp = this.getRelativeDate(file.date);
+                                    if (!this.historyFiles[grp])
+                                        this.historyFiles[grp] = [file]
+                                    else
+                                        this.historyFiles[grp].push(file);
+                                } else {
+                                    this.historyFiles[grp].push(file);
+                                }
+                            })
                     return resolve(this.historyFiles);
                 })
         })
@@ -204,13 +206,17 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
     }
 
     public deleteAll(): void {
-        const keys = Object.keys(this.historyFiles);
-        if (keys && keys.length) {
-            const items = [];
-            keys.forEach((key) => Array.prototype.push.apply(items, this.historyFiles[key]));
-            this.controller.deleteFiles(items)
-                .then(() => this.refresh());
-        }
+        // delete history for current file
+        this.controller.deleteHistory(this.currentHistoryFile)
+            .then(() => this.refresh());
+
+        // const keys = Object.keys(this.historyFiles);
+        // if (keys && keys.length) {
+        //     const items = [];
+        //     keys.forEach(key => items.push(...this.historyFiles[key].map(item => item.file)));
+        //     this.controller.deleteFiles(items)
+        //         .then(() => this.refresh());
+        // }
     }
 
     public show(file: vscode.Uri): void {
