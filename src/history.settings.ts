@@ -35,7 +35,9 @@ export class HistorySettings {
 
         // Find workspaceFolder corresponding to file
         let folder;
-        const wsFolder = vscode.workspace.getWorkspaceFolder(file);
+        // const wsFolder = vscode.workspace.getWorkspaceFolder(file);
+        // temporary code to resolve bug https://github.com/Microsoft/vscode/issues/36221
+        const wsFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(file.fsPath));
         if (wsFolder)
             folder = wsFolder.uri;
 

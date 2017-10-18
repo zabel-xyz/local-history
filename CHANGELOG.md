@@ -1,3 +1,6 @@
+##1.6.1
+* Fix vscode.workspace.getWorkspaceFolder(file) return null when open from command line [#24](https://github.com/zabel-xyz/local-history/issues/24)
+
 ##1.6.0
 ### Bugs fixed
 * Fix delete file history in treeView.
