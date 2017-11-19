@@ -77,7 +77,9 @@ export class HistorySettings {
     */
     private read(workspacefolder: vscode.Uri, file: vscode.Uri): IHistorySettings {
 
-        let config = vscode.workspace.getConfiguration('local-history', file),
+        // for now no ressource configurations
+        // let config = vscode.workspace.getConfiguration('local-history', file),
+        let config = vscode.workspace.getConfiguration('local-history'),
             enabled = <EHistoryEnabled>config.get('enabled'),
             exclude =  <string[]>config.get('exclude'),
             historyPath,
@@ -100,6 +102,32 @@ export class HistorySettings {
             if (historyPath) {
                 // replace variables like %AppData%
                 historyPath = historyPath.replace(/%([^%]+)%/g, (_, key) => process.env[key]);
+
+                // start with
+                // ${workspaceFolder} => current workspace
+                // ${workspaceFolder: name} => workspace find by name
+                // ${workspaceFolder: index} => workspace find by index
+                const match = historyPath.match(/\${workspaceFolder(?:\s*:\s*(.*))?}/i);
+                let historyWS: vscode.Uri;
+                if (match) {
+                    if (match.index > 1) {
+                        vscode.window.showErrorMessage(`\${workspaceFolder} must starts settings local-history.path ${historyPath}`);
+                        return;
+                    }
+                    const wsId = match[1];
+                    if (wsId) {
+                        const find = vscode.workspace.workspaceFolders.find(
+                            (ws) => Number.isInteger(wsId - 1) ? ws.index === Number.parseInt(wsId, 10) : ws.name === wsId);
+                        if (!find) {
+                            vscode.window.showErrorMessage(`workspaceFolder not found ${historyPath}`);
+                            return;
+                        }
+                        historyWS = find.uri;
+                    } else
+                        historyWS = workspacefolder;
+                    historyPath = historyPath.replace(match[0], historyWS.fsPath);
+                }
+
                 absolute = <boolean>config.get('absolute');
                 if (absolute || (!workspacefolder && enabled === EHistoryEnabled.Always)) {
                     absolute = true;
@@ -110,7 +138,7 @@ export class HistorySettings {
                     historyPath = path.join (
                         historyPath,
                         '.history',
-                        path.basename(workspacefolder.fsPath)
+                        (historyWS && this.pathIsInside(workspacefolder.fsPath, historyWS.fsPath) ? '' : path.basename(workspacefolder.fsPath))
                     );
                 }
             } else if (workspacefolder) {
@@ -139,4 +167,7 @@ export class HistorySettings {
         };
     }
 
+    private pathIsInside(test, parent) {
+        return require('path-is-inside')(test, parent);
+    }
 }

@@ -28,6 +28,11 @@ There is also an html-document (command: `View: Local history`)
         "local-history.dateLocale":     // The locale to use when displaying date
 
         "local-history.path":     // Specify another location for .history folder (null: use workspaceFolder)
+            This settings must be an abolute path. You can also start your path with:
+            ${workspaceFolder}: current workspace folder
+                e.g. ${workspaceFolder}/.vscode to save in each workspace folder .vscode/.history
+            ${workspaceFolder: 0}: first workspace folder
+                e.g. workspace folders A, B, C. But save always in A/.history
         "local-history.absolute": // Save absolute or relative path in local-history.path
             true:  (absolute) // <local-history.path>/.history/<absolutePath>
             false: (relative) // (default) <local-history.path>/.history/<workspaceFolder.basename>/<relativePath>

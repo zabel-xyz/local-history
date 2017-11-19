@@ -1,3 +1,9 @@
+##1.6.2
+### New features
+* Add variable ${workspaceFolder} for setting "local-history.path"
+* Add variable ${workspaceFolder: 0} for setting "local-history.path in multi-root workspace"
+* Support for multi-root workspace
+
 ##1.6.1
 * Fix vscode.workspace.getWorkspaceFolder(file) return null when open from command line [#24](https://github.com/zabel-xyz/local-history/issues/24)
 
