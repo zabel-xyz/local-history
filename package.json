@@ -190,7 +190,27 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Save absolute path in local-history.path"
-				}
+				},
+        "local-history.filename": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Save file with specific pattern (empty string is ignored)"
+        },
+        "local-history.filenamePattern": {
+                    "type": "array",
+                    "default": ["**"],
+                    "description": "If file name is defined, this defines on which files it should be applied"
+        },
+        "local-history.maxVersionCount": {
+                    "type": "number",
+                    "default": -1,
+                    "description": "Maximum amount of saves for a single file (-1: infinite)"
+        },
+        "local-history.saveOneStepAhead": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "If active, saves the current stand of file"
+        }
             }
  		}
 	},
@@ -205,7 +225,8 @@
         "pug": "2.0.0-rc.3",
         "mkdirp": "0.5.1",
         "anymatch": "1.3.2",
-        "is-path-inside": "1.0.0"
+        "is-path-inside": "1.0.0",
+        "winattr": "^2.0.0"
     },
 	"devDependencies": {
         "typescript": "2.6.1",
