@@ -198,7 +198,7 @@
         },
         "local-history.filenamePattern": {
                     "type": "array",
-                    "default": ["**"],
+                    "default": ["*"],
                     "description": "If file name is defined, this defines on which files it should be applied"
         },
         "local-history.maxVersionCount": {

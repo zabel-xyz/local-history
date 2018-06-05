@@ -191,13 +191,8 @@ export class HistorySettings {
     }
 
     private filenamePatternToRexExp(filenamePattern: string[]): RegExp[] {
-        const regexValue = {
-            '\\*': '[^\\.]*',
-            '\\*\\*': '.*'
-        };
-
         return filenamePattern.map( y => {
-            let pattern = EscapeRegExp(y).replace(/\\\*\\\*|\\\*/, match => regexValue[match]);
+            let pattern = EscapeRegExp(y).replace(/\\\*/, '.*');
             if (pattern[0] === '!') {
                 pattern = `((?!${pattern.slice(1)}$).*)`;
             }

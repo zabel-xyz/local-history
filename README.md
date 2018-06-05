@@ -71,8 +71,7 @@ There is also an html-document (command: `View: Local history`)
             false // The latest copy is the pervies stand of the source file
 
         "local-history.filenamePattern": // Files to save by filename pattern
-            ** - matches 0 or more characters
-            *  - matches 0 or more characters excluding '.'
+            * - matches 0 or more characters
             !  - prefix marks the pattern as being negative, meaning that only files that don't match the pattern will be included.
 
             ['**'] // (default)
