@@ -199,7 +199,7 @@ export class HistorySettings {
         return filenamePattern.map( y => {
             let pattern = EscapeRegExp(y).replace(/\\\*\\\*|\\\*/, match => regexValue[match]);
             if (pattern[0] === '!') {
-                pattern = `((?!${pattern.slice(1)}).)`;
+                pattern = `((?!${pattern.slice(1)}$).*)`;
             }
             return new RegExp(`^${pattern}$`);
         });
