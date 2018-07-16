@@ -8,6 +8,11 @@ const enum EHistoryEnabled {
     Workspace // only when file is in the opened folder
 }
 
+const enum EHistoryTreeLocation {
+    Explorer = 0,
+    LocalHistory
+}
+
 export interface IHistorySettings {
     folder: vscode.Uri;
     daysLimit: number;
@@ -27,11 +32,16 @@ export class HistorySettings {
 
     private settings: IHistorySettings[];
 
+    public static getTreeLocation(): EHistoryTreeLocation {
+        let config = vscode.workspace.getConfiguration('local-history');
+        return <EHistoryTreeLocation>config.get('treeLocation');
+    }
+
     constructor() {
         this.settings = [];
     }
 
-    public get(file: vscode.Uri) {
+    public get(file: vscode.Uri): IHistorySettings {
 
         // Find workspaceFolder corresponding to file
         let folder;

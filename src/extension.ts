@@ -21,12 +21,18 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('treeLocalHistory.deleteAll', treeProvider.deleteAll, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.refresh', treeProvider.refresh, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.more', treeProvider.more, treeProvider);
+
+    vscode.commands.registerCommand('treeLocalHistory.forCurrentFile', treeProvider.forCurrentFile, treeProvider);
+    vscode.commands.registerCommand('treeLocalHistory.forAll', treeProvider.forAll, treeProvider);
+    vscode.commands.registerCommand('treeLocalHistory.forSpecificFile', treeProvider.forSpecificFile, treeProvider);
+
     vscode.commands.registerCommand('treeLocalHistory.showEntry', treeProvider.show, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.showSideEntry', treeProvider.showSide, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.deleteEntry', treeProvider.delete, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.compareToCurrentEntry', treeProvider.compareToCurrent, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.selectEntry', treeProvider.select, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.compareEntry', treeProvider.compare, treeProvider);
+    vscode.commands.registerCommand('treeLocalHistory.restoreEntry', treeProvider.restore, treeProvider);
 
     // Create first history before save document
     vscode.workspace.onWillSaveTextDocument(
@@ -47,6 +53,11 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.onDidChangeActiveTextEditor(
         e => treeProvider.changeActiveFile()
     );
+
+    vscode.workspace.onDidChangeConfiguration(configChangedEvent => {
+        if ( configChangedEvent.affectsConfiguration('local-history.treeLocation') )
+            treeProvider.initLocation();
+    });
 }
 
 // function deactivate() {
