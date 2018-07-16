@@ -296,12 +296,15 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
                     switch (this.contentKind) {
                         case EHistoryTreeContentKind.All:
                             // Delete all history
-                            this.controller.deleteAll();
+                            this.controller.deleteAll(this.currentHistoryPath)
+                            .then(() => this.refresh())
+                            .catch(err => vscode.window.showErrorMessage(`Delete failed: ${err}`));
                             break;
                         case EHistoryTreeContentKind.Current:
                             // delete history for current file
                             this.controller.deleteHistory(this.currentHistoryFile)
-                            .then(() => this.refresh());
+                            .then(() => this.refresh())
+                            .catch(err => vscode.window.showErrorMessage(`Delete failed: ${err}`));
                             break;
                         case EHistoryTreeContentKind.Search:
                             // Delete visible history files
@@ -310,7 +313,8 @@ export default class HistoryTreeProvider implements vscode.TreeDataProvider<Hist
                                 const items = [];
                                 keys.forEach(key => items.push(...this.historyFiles[key].map(item => item.file)));
                                 this.controller.deleteFiles(items)
-                                    .then(() => this.refresh());
+                                    .then(() => this.refresh())
+                                    .catch(err => vscode.window.showErrorMessage(`Delete failed: ${err}`));
                             }
                             break;
                     }

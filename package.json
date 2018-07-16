@@ -270,7 +270,8 @@
         "mkdirp": "0.5.1",
         "anymatch": "2.0.0",
         "is-path-inside": "2.0.0",
-        "fs-copy-file": "2.1.2"
+        "fs-copy-file": "2.1.2",
+        "rimraf": "2.6.2"
     },
 	"devDependencies": {
         "typescript": "2.9.2",

@@ -5,6 +5,7 @@ import path = require('path');
 import Timeout from './timeout';
 
 import glob = require('glob');
+import rimraf = require('rimraf');
 import mkdirp = require('mkdirp');
 import anymatch = require('anymatch');
 
@@ -136,10 +137,14 @@ export class HistoryController {
         });
     }
 
-    public deleteAll() {
-        // TODO all workspaces !
-        // get .history
-        // return this.internalDeleteFile();
+    public deleteAll(fileHistoryPath: string) {
+        return new Promise((resolve, reject) => {
+            rimraf(fileHistoryPath, err => {
+                if (err)
+                    return reject(err);
+                return resolve();
+            });
+        });
     }
 
     public deleteHistory(fileName: string): Promise<void> {
