@@ -1,3 +1,13 @@
+##1.7.0
+### New features
+* 3 different history views (current, all, specific)
+* SubMenu item for restoring files [#23](https://github.com/zabel-xyz/local-history/issues/23)
+* Local history as activity bar item, use settings `local-history.treeLocation` [#41](https://github.com/zabel-xyz/local-history/issues/41)
+* Remove html document
+### Bugs fixed
+* Fix cannot read property 'document' of undefined [#31](https://github.com/zabel-xyz/local-history/issues/31)
+* Fix Cannot read property 'fsPath' of undefined [#35](https://github.com/zabel-xyz/local-history/issues/35)
+
 ##1.6.2
 ### New features
 * Add variable ${workspaceFolder} for setting "local-history.path"
