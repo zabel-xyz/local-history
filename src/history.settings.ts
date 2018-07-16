@@ -122,35 +122,40 @@ export class HistorySettings {
                 if (match) {
                     if (match.index > 1) {
                         vscode.window.showErrorMessage(`\${workspaceFolder} must starts settings local-history.path ${historyPath}`);
-                        return;
+                    } else {
+                        const wsId = match[1];
+                        if (wsId) {
+                            const find = vscode.workspace.workspaceFolders.find(
+                                (ws) => Number.isInteger(wsId - 1) ? ws.index === Number.parseInt(wsId, 10) : ws.name === wsId);
+                            if (find)
+                                historyWS = find.uri;
+                            else
+                                vscode.window.showErrorMessage(`workspaceFolder not found ${historyPath}`);
+                        } else
+                            historyWS = workspacefolder;
                     }
-                    const wsId = match[1];
-                    if (wsId) {
-                        const find = vscode.workspace.workspaceFolders.find(
-                            (ws) => Number.isInteger(wsId - 1) ? ws.index === Number.parseInt(wsId, 10) : ws.name === wsId);
-                        if (!find) {
-                            vscode.window.showErrorMessage(`workspaceFolder not found ${historyPath}`);
-                            return;
-                        }
-                        historyWS = find.uri;
-                    } else
-                        historyWS = workspacefolder;
-                    historyPath = historyPath.replace(match[0], historyWS.fsPath);
+                    if (historyWS)
+                        historyPath = historyPath.replace(match[0], historyWS.fsPath);
+                    else
+                        historyPath = null;
                 }
 
-                absolute = <boolean>config.get('absolute');
-                if (absolute || (!workspacefolder && enabled === EHistoryEnabled.Always)) {
-                    absolute = true;
+                if (historyPath) {
+                    absolute = <boolean>config.get('absolute');
+                    if (absolute || (!workspacefolder && enabled === EHistoryEnabled.Always)) {
+                        absolute = true;
                     historyPath = path.join (
                         historyPath,
                         '.history');
-                } else if (workspacefolder) {
-                    historyPath = path.join (
-                        historyPath,
-                        '.history',
-                        (historyWS && this.pathIsInside(workspacefolder.fsPath, historyWS.fsPath) ? '' : path.basename(workspacefolder.fsPath))
-                    );
+                    } else if (workspacefolder) {
+                        historyPath = path.join (
+                            historyPath,
+                            '.history',
+                            (historyWS && this.pathIsInside(workspacefolder.fsPath, historyWS.fsPath) ? '' : path.basename(workspacefolder.fsPath))
+                        );
+                    }
                 }
+
             } else if (workspacefolder) {
                 // Save only files in workspace
                 absolute = false;
