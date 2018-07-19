@@ -11,21 +11,27 @@ Each file revision is stored in a separate file inside the .history folder of yo
 e.g., `.history/foo/bar/myFile_20151212205930.ts`
 
 You can easily navigate between history files with the `local-history tree` in the explorer pane.<BR>
+
 When you click on a file, a comparaison with the current version is displayed.<BR>
 You can also access other commands via a context menu.<BR>
 
 ![Image of tree](images/Tree.png)
 
-There is also an html-document (command: `View: Local history`)
+You have different views to filter:
+- all
+- current file (default)
+- specific file (you can enter a search pattern)
 
-![Image of html](images/HtmlPreview.png)
+![Image of tree](images/Tree2.png)
+
+The files displayed depend on setting `local-history.maxDisplay` to see more, use search-plus icon.
 
 ## Settings
 
         "local-history.daysLimit":  30  // A day number to purge local history. (0: no purge)
         "local-history.maxDisplay": 10  // A max files to display with local history commands
         "local-history.saveDelay":   0  // A delay in seconds to save file in local history. {0: no delay}
-        "local-history.dateLocale":     // The locale to use when displaying date
+        "local-history.dateLocale":     // The locale to use when displaying date (e.g.: "fr-CH" or "en-GB" or ...)
 
         "local-history.path":     // Specify another location for .history folder (null: use workspaceFolder)
             This settings must be an abolute path. You can also start your path with:
@@ -44,6 +50,10 @@ There is also an html-document (command: `View: Local history`)
 
         "local-history.exclude": // Files or folders to not save
             // (default) ['**/.history/**', '**/.vscode**', '**/node_modules/**', '**/typings/**', '**/out/**']
+
+        "local-history.treeLocation": // Specify a location for tree view
+            explorer (default): // Show tree in Explorer item
+            localHistory:       // Show tree in a special active bar item
 
         "local-history.filename":
             // use §p and ${workspaceFolder} only at the start of the name ('($p|${workspaceFolder})...'),
@@ -83,8 +93,6 @@ There is also an html-document (command: `View: Local history`)
     local-history.compareToCurrent // compare current version with another version in history
     local-history.compareToActive // compare active file with another version in history
     local-history.compareToPrevious // compare a version in history with its previous version
-
-    local-history.showViewer // Show the history in a html document
 
 ## Note
 When .history folder is stored in workspace, you can add a "files.exclude".

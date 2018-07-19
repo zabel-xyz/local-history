@@ -6,11 +6,17 @@ import {IHistorySettings, HistorySettings, EscapeRegExp} from './history.setting
 import Timeout from './timeout';
 
 const os = require('os');
-const glob = require('glob');
-const mkdirp = require('mkdirp');
-const anymatch = require('anymatch');
+import glob = require('glob');
+import rimraf = require('rimraf');
+import mkdirp = require('mkdirp');
+import anymatch = require('anymatch');
 const counterRegExp = new RegExp(/\$(\d*)c/);
 const winattr = require("winattr/lib");
+
+// node 8.5 has natively fs.copyFile
+import copyFile = require('fs-copy-file');
+
+import {IHistorySettings, HistorySettings} from './history.settings';
 
 interface IHistoryActionValues {
     active: string;
@@ -77,8 +83,8 @@ export class HistoryController {
         this.internalShowAll(this.actionCompareToPrevious, editor, this.getSettings(editor.document.uri));
     }
 
-    public compare(file1: vscode.Uri, file2: vscode.Uri, column?: string) {
-        return this.internalCompare(file1, file2, column);
+    public compare(file1: vscode.Uri, file2: vscode.Uri, column?: string, range?: vscode.Range) {
+        return this.internalCompare(file1, file2, column, range);
     }
 
     public findAllHistory(fileName: string, settings: IHistorySettings, noLimit?: boolean): Promise<IHistoryFileProperties> {
@@ -95,6 +101,24 @@ export class HistoryController {
                 })
                 .catch(err => reject(err));
         });
+    }
+
+    public findGlobalHistory(find: string, findFile: boolean, settings: IHistorySettings, noLimit?: boolean): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+
+            if (!settings.enabled)
+                resolve();
+
+            if (findFile)
+                this.findAllHistory(find, settings, noLimit)
+                    .then(fileProperties => resolve(fileProperties && fileProperties.history));
+            else
+                this.getHistoryFiles(find, settings, noLimit)
+                    .then(files => {
+                        resolve(files);
+                    })
+                    .catch(err => reject(err));
+            });
     }
 
     public decodeFile(filePath: string, settings: IHistorySettings, history?: boolean): IHistoryFileProperties {
@@ -117,6 +141,16 @@ export class HistoryController {
         });
     }
 
+    public deleteAll(fileHistoryPath: string) {
+        return new Promise((resolve, reject) => {
+            rimraf(fileHistoryPath, err => {
+                if (err)
+                    return reject(err);
+                return resolve();
+            });
+        });
+    }
+
     public deleteHistory(fileName: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             const settings = this.getSettings(vscode.Uri.file(fileName));
@@ -126,6 +160,24 @@ export class HistoryController {
                 .then(() => resolve())
                 .catch((err) => reject());
         });
+    }
+
+    public restore(fileName: vscode.Uri) {
+        const src = fileName.fsPath;
+        const settings = this.getSettings(vscode.Uri.file(src));
+        const fileProperties = this.decodeFile(src, settings, false);
+        if (fileProperties && fileProperties.file) {
+            return new Promise((resolve, reject) => {
+                // Node v.8.5 has fs.copyFile
+                const fnCopy = fs.copyFile || copyFile;
+
+                fnCopy(src, fileProperties.file, err => {
+                    if (err)
+                        return reject(err);
+                    return resolve();
+                });
+            });
+        }
     }
 
     /* private */
@@ -439,7 +491,7 @@ export class HistoryController {
 
             // glob must use character /
             const historyPath = settings.historyPath.replace(/\\/g, '/');
-            glob(patternFilePath, {cwd: historyPath}, (err, files: string[]) => {
+            glob(patternFilePath, {cwd: historyPath, absolute: true}, (err, files: string[]) => {
                 if (!err) {
                     if (files && files.length) {
                         // files are sorted in ascending order
@@ -532,24 +584,15 @@ export class HistoryController {
             });
     }
 
-    private internalCompare(file1: vscode.Uri, file2: vscode.Uri, column?: string) {
+    private internalCompare(file1: vscode.Uri, file2: vscode.Uri, column?: string, range?: vscode.Range) {
         if (file1 && file2) {
-            if (column) {
-                // Set focus on the column
-                switch (Number.parseInt(column, 10)) {
-                    case 1:
-                        vscode.commands.executeCommand('workbench.action.focusFirstEditorGroup');
-                        break;
-                    case 2:
-                        vscode.commands.executeCommand('workbench.action.focusSecondEditorGroup');
-                        break;
-                    default:
-                        vscode.commands.executeCommand('workbench.action.focusThirdEditorGroup');
-                }
-            }
+            const option: any = {};
+            if (column)
+                option.viewColumn = Number.parseInt(column, 10);
+            option.selection = range;
             // Diff on the active column
             let title = path.basename(file1.fsPath)+'<->'+path.basename(file2.fsPath);
-            vscode.commands.executeCommand('vscode.diff', file1, file2, title);
+            vscode.commands.executeCommand('vscode.diff', file1, file2, title, option);
         }
     }
 
