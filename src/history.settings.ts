@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import path = require('path');
+import os = require('os');
 
 const enum EHistoryEnabled {
     Never = 0,
@@ -112,6 +113,8 @@ export class HistorySettings {
             if (historyPath) {
                 // replace variables like %AppData%
                 historyPath = historyPath.replace(/%([^%]+)%/g, (_, key) => process.env[key]);
+                historyPath = historyPath.replace(/\$\{env:([^}]+)\}/g, (_, key) => process.env[key]);
+                historyPath = historyPath.replace(/^~/, os.homedir());
 
                 // start with
                 // ${workspaceFolder} => current workspace
@@ -169,13 +172,18 @@ export class HistorySettings {
         if (historyPath)
             historyPath = historyPath.replace(/\//g, path.sep);
 
+        if ( exclude.length === 0 ) {
+            exclude = ['**/.history/**', '**/.vscode/**', '**/node_modules/**', '**/typings/**', '**/out/**', '**/Code/User/**'];
+        }
+        exclude.push(`${historyPath}/**`);
+
         return {
             folder: workspacefolder,
             daysLimit: <number>config.get('daysLimit') || 30,
             saveDelay: <number>config.get('saveDelay') || 0,
             maxDisplay: <number>config.get('maxDisplay') || 10,
             dateLocale: <string>config.get('dateLocale') || undefined,
-            exclude: <string[]>config.get('exclude') || ['**/.history/**','**/.vscode/**','**/node_modules/**','**/typings/**','**/out/**'],
+            exclude: exclude,
             enabled: historyPath != null && historyPath !== '',
             historyPath: historyPath,
             absolute: absolute
