@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 
 import fs = require('fs');
 import path = require('path');
-import {IHistorySettings, HistorySettings, EscapeRegExp} from './history.settings';
 import Timeout from './timeout';
 
 const os = require('os');
@@ -16,8 +15,7 @@ const winattr = require("winattr/lib");
 // node 8.5 has natively fs.copyFile
 import copyFile = require('fs-copy-file');
 
-import {IHistorySettings, HistorySettings} from './history.settings';
-
+import {IHistorySettings, HistorySettings, EscapeRegExp} from './history.settings';
 interface IHistoryActionValues {
     active: string;
     selected: string;
