@@ -281,6 +281,7 @@
 	},
 	"main": "./out/src/extension",
     "scripts": {
+        "package": "vsce package",
         "vscode:prepublish": "tsc -p ./",
         "compile": "tsc -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install"
@@ -292,6 +293,7 @@
         "is-path-inside": "2.0.0",
         "fs-copy-file": "2.1.2",
         "rimraf": "2.6.2",
+        "vsce": "^1.50.0",
         "winattr": "^2.0.0"
     },
 	"devDependencies": {
