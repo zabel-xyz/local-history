@@ -1,20 +1,20 @@
 {
-	"name": "local-history",
-	"displayName": "Local History",
+	"name": "local-history-hks",
+	"displayName": "Local History HKS",
 	"description": "Save files into local history",
-    "publisher": "xyz",
+    "publisher": "HKSInformatik",
 	"version": "1.7.0",
 	"engines": {
         "vscode": "^1.25.0"
 	},
     "icon": "images/local-history.png",
-    "homepage": "https://github.com/zabel-xyz/local-history",
+    "homepage": "https://github.com/HKSInformatik/local-history",
     "repository": {
         "type": "git",
-        "url": "https://github.com/zabel-xyz/local-history.git"
+        "url": "https://github.com/HKSInformatik/local-history.git"
     },
 	"bugs": {
-		"url": "https://github.com/zabel-xyz/local-history/issues"
+		"url": "https://github.com/HKSInformatik/local-history/issues"
 	},
 	"keywords": [
 		"local",
