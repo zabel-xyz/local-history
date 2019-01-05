@@ -92,8 +92,11 @@
             "command": "treeLocalHistory.deleteEntry",
             "title": "Delete"
         },{
+            "command": "treeLocalHistory.compareToActiveEntry",
+            "title": "Compare with active file"
+        },{
             "command": "treeLocalHistory.compareToCurrentEntry",
-            "title": "Compare with current"
+            "title": "Compare with current version"
         },{
             "command": "treeLocalHistory.selectEntry",
             "title": "Select for compare"
@@ -166,6 +169,10 @@
                 "command": "treeLocalHistory.showSideEntry",
                 "when": "view == treeLocalHistory && viewItem == localHistoryItem",
                 "group": "1_tree-navigation@1"
+            },{
+                "command": "treeLocalHistory.compareToActiveEntry",
+                "when": "view == treeLocalHistory && viewItem == localHistoryItem",
+                "group": "2_tree-compare@1"
             },{
                 "command": "treeLocalHistory.compareToCurrentEntry",
                 "when": "view == treeLocalHistory && viewItem == localHistoryItem",

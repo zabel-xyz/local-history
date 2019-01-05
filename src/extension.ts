@@ -29,6 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('treeLocalHistory.showEntry', treeProvider.show, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.showSideEntry', treeProvider.showSide, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.deleteEntry', treeProvider.delete, treeProvider);
+    vscode.commands.registerCommand('treeLocalHistory.compareToActiveEntry', treeProvider.compareToActive, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.compareToCurrentEntry', treeProvider.compareToCurrent, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.selectEntry', treeProvider.select, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.compareEntry', treeProvider.compare, treeProvider);
