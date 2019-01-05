@@ -48,6 +48,7 @@ The files displayed depend on setting `local-history.maxDisplay` to see more, us
             - %_variable_%: an environnement variable (e.g. %AppData%)
             - ${env: _variable_}: an environnement variable
             - ~: the home directory
+            - ${workspaceName}: the name of current workspace
 
         "local-history.absolute": // Save absolute or relative path in local-history.path
             true:  (absolute) // <local-history.path>/.history/<absolutePath>

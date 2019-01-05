@@ -69,7 +69,7 @@ export class HistorySettings {
                 return (folder === value.folder);
         });
         if (!settings) {
-            settings = this.read(folder, file);
+            settings = this.read(folder, file, wsFolder);
             this.settings.push(settings);
         }
         return settings;
@@ -90,7 +90,7 @@ export class HistorySettings {
        saved in vscode.getworkspacefolder\.history\<relative>
        (no workspacefolder => not saved)
     */
-    private read(workspacefolder: vscode.Uri, file: vscode.Uri): IHistorySettings {
+    private read(workspacefolder: vscode.Uri, file: vscode.Uri, ws: vscode.WorkspaceFolder): IHistorySettings {
 
         // for now no ressource configurations
         // let config = vscode.workspace.getConfiguration('local-history', file),
@@ -117,12 +117,14 @@ export class HistorySettings {
             if (historyPath) {
 
                 historyPath = historyPath
-                // replace variables like %AppData%
+                        // replace variables like %AppData%
                         .replace(/%([^%]+)%/g, (_, key) => process.env[key.trim()])
                         // supports ${env: key}
                         .replace(/\${env:([^}]+)}/gi, (_, key) => process.env[key.trim()])
                         // supports character ~ for homedir
                         .replace(/^~/, os.homedir())
+                        // supports ${workspaceName}
+                        .replace(/\${workspaceName}/gi, ws ? ws.name : '');
 
                 // start with
                 // ${workspaceFolder} => current workspace
