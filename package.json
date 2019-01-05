@@ -33,7 +33,7 @@
         "viewsContainers": {
             "activitybar": [{
                 "id": "localHistory",
-                "icon": "resources/images/dark/history.png",
+                "icon": "resources/images/dark/history.svg",
                 "title": "Local history"
             }]
         },
