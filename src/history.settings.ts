@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import path = require('path');
+import os = require('os');
 
 const enum EHistoryEnabled {
     Never = 0,
@@ -114,8 +115,14 @@ export class HistorySettings {
         if (enabled !== EHistoryEnabled.Never) {
             historyPath = <string>config.get('path');
             if (historyPath) {
+
+                historyPath = historyPath
                 // replace variables like %AppData%
-                historyPath = historyPath.replace(/%([^%]+)%/g, (_, key) => process.env[key]);
+                        .replace(/%([^%]+)%/g, (_, key) => process.env[key.trim()])
+                        // supports ${env: key}
+                        .replace(/\${env:([^}]+)}/gi, (_, key) => process.env[key.trim()])
+                        // supports character ~ for homedir
+                        .replace(/^~/, os.homedir())
 
                 // start with
                 // ${workspaceFolder} => current workspace
