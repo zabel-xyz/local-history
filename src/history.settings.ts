@@ -74,6 +74,10 @@ export class HistorySettings {
         return settings;
     }
 
+    public clear() {
+        this.settings = [];
+    }
+
     /*
     historyPath
        absolute

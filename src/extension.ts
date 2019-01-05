@@ -57,6 +57,11 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidChangeConfiguration(configChangedEvent => {
         if ( configChangedEvent.affectsConfiguration('local-history.treeLocation') )
             treeProvider.initLocation();
+
+        else if ( configChangedEvent.affectsConfiguration('local-history') ) {
+            controller.clearSettings();
+            treeProvider.refresh();
+        }
     });
 }
 

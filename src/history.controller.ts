@@ -125,6 +125,10 @@ export class HistoryController {
         return this.settings.get(file);
     }
 
+    public clearSettings() {
+        this.settings.clear();
+    }
+
     public deleteFile(fileName: string): Promise<void> {
         return this.deleteFiles([fileName]);
     }
