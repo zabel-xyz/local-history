@@ -23,6 +23,7 @@ export interface IHistorySettings {
     exclude: string[];
     enabled: boolean;
     historyPath: string;
+    folderName: string;
     absolute: boolean;
 }
 
@@ -99,7 +100,7 @@ export class HistorySettings {
             exclude =  <string[]>config.get('exclude'),
             historyPath,
             absolute,
-            folderName = <string>config.get('folderName'),
+            folderName = <string>config.get('folderName') || '.history',
             message = '';
 
         if (typeof enabled === 'boolean')
@@ -193,6 +194,7 @@ export class HistorySettings {
             exclude: <string[]>config.get('exclude') || ['**/.history/**','**/.vscode/**','**/node_modules/**','**/typings/**','**/out/**'],
             enabled: historyPath != null && historyPath !== '',
             historyPath: historyPath,
+            folderName: folderName,
             absolute: absolute
         };
     }
