@@ -82,12 +82,12 @@ export class HistorySettings {
     /*
     historyPath
        absolute
-         saved in historyPath\.history\<absolute>
+         saved in historyPath\folderName\<absolute>
        not absolute
-         saved in historyPath\.history\vscode.getworkspacefolder.basename\<relative>
+         saved in historyPath\folderName\vscode.getworkspacefolder.basename\<relative>
          (no workspacefolder like absolute if always)
     no historyPath
-       saved in vscode.getworkspacefolder\.history\<relative>
+       saved in vscode.getworkspacefolder\folderName\<relative>
        (no workspacefolder => not saved)
     */
     private read(workspacefolder: vscode.Uri, file: vscode.Uri, ws: vscode.WorkspaceFolder): IHistorySettings {
@@ -158,9 +158,10 @@ export class HistorySettings {
                     absolute = <boolean>config.get('absolute');
                     if (absolute || (!workspacefolder && enabled === EHistoryEnabled.Always)) {
                         absolute = true;
-                    historyPath = path.join (
-                        historyPath,
-                        folderName);
+	                    historyPath = path.join (
+	                        historyPath,
+	                        folderName
+                        );
                     } else if (workspacefolder) {
                         historyPath = path.join (
                             historyPath,
