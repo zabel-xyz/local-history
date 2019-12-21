@@ -58,7 +58,7 @@
         },{
             "command": "treeLocalHistory.more",
             "title": "See more history",
-            "icon": "$(search)"
+            "icon": "$(zoom-in)"
         },{
             "command": "treeLocalHistory.deleteAll",
             "title": "Delete history",
