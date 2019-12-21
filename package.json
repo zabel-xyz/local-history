@@ -54,26 +54,16 @@
 	    "commands": [{
             "command": "treeLocalHistory.refresh",
             "title": "Refresh",
-            "icon": {
-                "light": "resources/images/light/refresh.png",
-                "dark": "resources/images/dark/refresh.png"
-            }
+            "icon": "$(refresh)"
         },{
             "command": "treeLocalHistory.more",
             "title": "See more history",
-            "icon": {
-                "light": "resources/images/light/search-plus.png",
-                "dark": "resources/images/dark/search-plus.png"
-            }
+            "icon": "$(search)"
         },{
             "command": "treeLocalHistory.deleteAll",
             "title": "Delete history",
-            "icon": {
-                "light": "resources/images/light/deleteAll.png",
-                "dark": "resources/images/dark/deleteAll.png"
-            }
+            "icon": "$(trash)"
         },
-
         {
             "command": "treeLocalHistory.forCurrentFile",
             "title": "Current file"
