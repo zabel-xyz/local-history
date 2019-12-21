@@ -132,8 +132,32 @@
             },{
                 "command": "treeLocalHistory.forSpecificFile",
                 "when": "false"
-            }],
-
+            },
+			{
+				"command": "treeLocalHistory.showSideEntry",
+				"when": "false"
+			},
+			{
+				"command": "treeLocalHistory.deleteEntry",
+				"when": "false"
+			},
+			{
+				"command": "treeLocalHistory.compareToCurrentEntry",
+				"when": "false"
+			},
+			{
+				"command": "treeLocalHistory.selectEntry",
+				"when": "false"
+			},
+			{
+				"command": "treeLocalHistory.compareEntry",
+				"when": "false"
+			},
+			{
+				"command": "treeLocalHistory.restoreEntry",
+				"when": "false"
+			}
+		  	],
             "view/title": [{
                 "command": "treeLocalHistory.refresh",
                 "when": "view == treeLocalHistory",
