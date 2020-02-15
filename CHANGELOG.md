@@ -1,3 +1,14 @@
+##1.8.0
+### Improvements
+* Change settings dynamically [#38](https://github.com/zabel-xyz/local-history/issues/38)
+* Icon in side bar (use of svg) [#48](https://github.com/zabel-xyz/local-history/issues/48)
+* Icon for treeView (use of vscode builtin icons) [#95](https://github.com/zabel-xyz/local-history/issues/95)
+### Bugs fixed
+* Fix use of character ~ on linux system [#47](https://github.com/zabel-xyz/local-history/issues/47)
+* Use of fs.mkdirSync, fs.copyFile inplace of third library usage [#75](https://github.com/zabel-xyz/local-history/issues/75)
+* local-history.treeLocation not working [#98](https://github.com/zabel-xyz/local-history/issues/98)
+* Remove commands for tree in the command panel [#94](https://github.com/zabel-xyz/local-history/issues/94)
+
 ##1.7.0
 ### New features
 * 3 different history views (current, all, specific)

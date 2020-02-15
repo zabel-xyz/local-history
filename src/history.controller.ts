@@ -6,11 +6,11 @@ import Timeout from './timeout';
 
 import glob = require('glob');
 import rimraf = require('rimraf');
-import mkdirp = require('mkdirp');
+// import mkdirp = require('mkdirp');
 import anymatch = require('anymatch');
 
 // node 8.5 has natively fs.copyFile
-import copyFile = require('fs-copy-file');
+// import copyFile = require('fs-copy-file');
 
 import {IHistorySettings, HistorySettings} from './history.settings';
 
@@ -125,6 +125,10 @@ export class HistoryController {
         return this.settings.get(file);
     }
 
+    public clearSettings() {
+        this.settings.clear();
+    }
+
     public deleteFile(fileName: string): Promise<void> {
         return this.deleteFiles([fileName]);
     }
@@ -165,9 +169,9 @@ export class HistoryController {
         if (fileProperties && fileProperties.file) {
             return new Promise((resolve, reject) => {
                 // Node v.8.5 has fs.copyFile
-                const fnCopy = fs.copyFile || copyFile;
+                // const fnCopy = fs.copyFile || copyFile;
 
-                fnCopy(src, fileProperties.file, err => {
+                fs.copyFile(src, fileProperties.file, err => {
                     if (err)
                         return reject(err);
                     return resolve();
@@ -268,6 +272,7 @@ export class HistoryController {
 
         // Use '/' with glob
         const docFile = document.fileName.replace(/\\/g, '/');
+        // @ts-ignore
         if (settings.exclude && settings.exclude.length > 0 && anymatch(settings.exclude, docFile))
             return false;
 
@@ -520,7 +525,8 @@ export class HistoryController {
 
     private mkDirRecursive(fileName: string): boolean {
         try {
-            mkdirp.sync(path.dirname(fileName));
+            fs.mkdirSync(path.dirname(fileName), {recursive: true});
+            // mkdirp.sync(path.dirname(fileName));
             return true;
         }
         catch (err) {

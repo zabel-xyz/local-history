@@ -1,6 +1,5 @@
 *.map
 *.vsix
-
-.history/*
+**/.history/*
 node_modules/*
 out/*

@@ -18,6 +18,8 @@ export function activate(context: vscode.ExtensionContext) {
     // Tree
     const treeProvider = new HistoryTreeProvider(controller);
     vscode.window.registerTreeDataProvider('treeLocalHistory', treeProvider);
+    vscode.window.registerTreeDataProvider('treeLocalHistoryExplorer', treeProvider);
+
     vscode.commands.registerCommand('treeLocalHistory.deleteAll', treeProvider.deleteAll, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.refresh', treeProvider.refresh, treeProvider);
     vscode.commands.registerCommand('treeLocalHistory.more', treeProvider.more, treeProvider);
@@ -57,6 +59,11 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidChangeConfiguration(configChangedEvent => {
         if ( configChangedEvent.affectsConfiguration('local-history.treeLocation') )
             treeProvider.initLocation();
+
+        else if ( configChangedEvent.affectsConfiguration('local-history') ) {
+            controller.clearSettings();
+            treeProvider.refresh();
+        }
     });
 }
 
