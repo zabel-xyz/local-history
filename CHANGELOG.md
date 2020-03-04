@@ -1,3 +1,6 @@
+## 1.8.1
+* Fix error "Cannot find module 'path-is-inside'" [#102](https://github.com/zabel-xyz/local-history/issues/102)
+
 ## 1.8.0
 ### Improvements
 * Change settings dynamically [#38](https://github.com/zabel-xyz/local-history/issues/38)
