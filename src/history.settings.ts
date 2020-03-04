@@ -192,6 +192,6 @@ export class HistorySettings {
     }
 
     private pathIsInside(test, parent) {
-        return require('path-is-inside')(test, parent);
+        return require('is-path-inside')(test, parent);
     }
 }
