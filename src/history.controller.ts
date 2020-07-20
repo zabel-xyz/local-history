@@ -401,7 +401,7 @@ export class HistoryController {
 
         p = path.parse(filePath);
 
-        if (filePath.includes('/.history/') || filePath.includes('\\.history\\') ) { //startsWith(this.settings.historyPath))
+        if (filePath.includes(`/${settings.folderName}/`) || filePath.includes(`\\${settings.folderName}\\`) ) { //startsWith(this.settings.historyPath))
             isHistory = true;
             let index = p.name.match(me.regExp);
             if (index) {
