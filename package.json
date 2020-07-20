@@ -294,14 +294,14 @@
         "compile": "tsc -p ./"
     },
     "dependencies": {
-        "anymatch": "3.1.1",
-        "glob": "7.1.6",
-        "is-path-inside": "3.0.2",
-        "rimraf": "3.0.2"
+        "anymatch": "^3.1.1",
+        "glob": "^7.1.6",
+        "is-path-inside": "^3.0.2",
+        "rimraf": "^3.0.2"
     },
     "devDependencies": {
-        "@types/node": "13.7.1",
-        "@types/vscode": "1.42.0",
-        "typescript": "3.7.5"
+        "@types/node": "^13.7.1",
+        "@types/vscode": "^1.42.0",
+        "typescript": "^3.7.5"
     }
 }
