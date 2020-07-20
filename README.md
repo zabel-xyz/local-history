@@ -7,8 +7,8 @@ At any time, you can compare a file with any older version from the history.
 It can help you out when you change or delete a file by accident.
 The history can also help you out when your workspace has a catastrophic problem.
 Each file revision is stored in a separate file inside the .history folder of your workspace directory
-(you can also configure another location, see local-history.path).
-e.g., `.history/foo/bar/myFile_20151212205930.ts`
+(you can also configure another location, see `local-history.path` and another folder name, see `local-history.folderName`).
+e.g., `~/.my_backups/foo/bar/myFile_20151212205930.ts`
 
 You can easily navigate between history files with the `local-history tree` in the explorer pane.<BR>
 
@@ -61,6 +61,9 @@ The files displayed depend on setting `local-history.maxDisplay` to see more, us
         "local-history.treeLocation": // Specify a location for tree view
             explorer (default): // Show tree in Explorer item
             localHistory:       // Show tree in a special active bar item
+
+        "local-history.folderName": // Specify a folder name for history, will be created in <local-history.path>
+            // (default) .history
 
 ## Commands
 

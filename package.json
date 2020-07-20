@@ -269,7 +269,7 @@
                 "local-history.path": {
                     "type": "string",
                     "default": "",
-                    "description": "Specify a location for .history folder (null: use workspaceFolder)"
+                    "description": "Specify a location for the history folder (null: use workspaceFolder)"
                 },
                 "local-history.absolute": {
                     "type": "boolean",
@@ -284,6 +284,11 @@
                         "localHistory"
                     ],
                     "description": "Specify a location for tree view: explorer or localHistory"
+                },
+                "local-history.folderName": {
+                    "type": "string",
+                    "default": ".history",
+                    "description": "Specify a folder name for history, will be created in local-history.path"
                 }
             }
         }
