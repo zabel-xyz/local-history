@@ -180,11 +180,11 @@ export class HistorySettings {
 
         return {
             folder: workspacefolder,
-            daysLimit: <number>config.get('daysLimit') || 30,
-            saveDelay: <number>config.get('saveDelay') || 0,
-            maxDisplay: <number>config.get('maxDisplay') || 10,
-            dateLocale: <string>config.get('dateLocale') || undefined,
-            exclude: <string[]>config.get('exclude') || ['**/.history/**','**/.vscode/**','**/node_modules/**','**/typings/**','**/out/**'],
+            daysLimit: <number>config.get('daysLimit', 30),
+            saveDelay: <number>config.get('saveDelay', 0),
+            maxDisplay: <number>config.get('maxDisplay', 10),
+            dateLocale: <string>config.get('dateLocale', undefined),
+            exclude: <string[]>config.get('exclude', ['**/.history/**','**/.vscode/**','**/node_modules/**','**/typings/**','**/out/**']),
             enabled: historyPath != null && historyPath !== '',
             historyPath: historyPath,
             absolute: absolute
