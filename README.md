@@ -1,6 +1,6 @@
 # Local History
 
-A visual source code plugin for maintaining local history of files.
+A Visual Studio Code extension for maintaining a local history of modified files.
 
 Every time you modify a file, a copy of the old contents is kept in the local history.
 At any time, you can compare a file with any older version from the history.
@@ -12,7 +12,7 @@ e.g., `.history/foo/bar/myFile_20151212205930.ts`
 
 You can easily navigate between history files with the `local-history tree` in the explorer pane.<BR>
 
-When you click on a file, a comparaison with the current version is displayed.<BR>
+When you click on a file, a comparison with the current version is displayed.<BR>
 You can also access other commands via a context menu.<BR>
 
 ![Image of tree](images/Tree.png)
