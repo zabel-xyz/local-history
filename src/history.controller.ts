@@ -505,7 +505,7 @@ export class HistoryController {
                 for (let file of files) {
                     stat = fs.statSync(file);
                     if (stat && stat.isFile()) {
-                        endTime = stat.birthtime.getTime() + settings.daysLimit * 24*60*60*1000;
+                        endTime = stat.mtime.getTime() + settings.daysLimit * 24*60*60*1000;
                         if (now > endTime) {
                             fs.unlinkSync(file);
                         }
