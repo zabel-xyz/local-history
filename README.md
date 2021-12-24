@@ -12,7 +12,7 @@ e.g., `.history/foo/bar/myFile_20151212205930.ts`
 
 You can easily navigate between history files with the `local-history tree` in the explorer pane.<BR>
 
-When you click on a file, a comparaison with the current version is displayed.<BR>
+When you click on a file, a comparison with the current version is displayed.<BR>
 You can also access other commands via a context menu.<BR>
 
 ![Image of tree](images/Tree.png)
