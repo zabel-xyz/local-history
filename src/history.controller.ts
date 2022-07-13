@@ -221,6 +221,9 @@ export class HistoryController {
             }
 
             const p = path.parse(document.fileName);
+            if(!!settings.includeWorkspaceFolders) {
+              revisionDir += `/${this.getWorkspaceFolder(document)}`;
+            }
             const revisionPattern = this.joinPath(settings.historyPath, revisionDir, p.name, p.ext);     // toto_[0-9]...
 
             if (isOriginal) {
@@ -521,6 +524,12 @@ export class HistoryController {
             return relative;
         } else
             return path.basename(fileName);
+    }
+
+    private getWorkspaceFolder(document) {
+      return vscode.workspace.getWorkspaceFolder(
+        document.uri
+      ).name;
     }
 
     private mkDirRecursive(fileName: string): boolean {

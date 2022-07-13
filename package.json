@@ -3,7 +3,7 @@
     "displayName": "Local History",
     "description": "Save files into local history",
     "publisher": "xyz",
-    "version": "1.8.1",
+    "version": "1.8.1+1.0.0",
     "engines": {
         "vscode": "^1.42.0"
     },
@@ -284,6 +284,11 @@
                         "localHistory"
                     ],
                     "description": "Specify a location for tree view: explorer or localHistory"
+                },
+                "local-history.includeWorkspaceFolders": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Arrange files in root history directory based on their workspace folder"
                 }
             }
         }
