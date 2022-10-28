@@ -34,7 +34,7 @@ The files displayed depend on setting `local-history.maxDisplay` to see more, us
         "local-history.dateLocale":     // The locale to use when displaying date (e.g.: "fr-CH" or "en-GB" or ...)
 
         "local-history.path":     // Specify another location for .history folder (null: use workspaceFolder)
-            This settings must be an absolute path.
+            This setting must be an absolute path.
 
             You can start your path with:
             ${workspaceFolder}: current workspace folder
@@ -51,7 +51,7 @@ The files displayed depend on setting `local-history.maxDisplay` to see more, us
             false: (relative) // (default) <local-history.path>/.history/<workspaceFolder.basename>/<relativePath>
 
         "local-history.enabled":
-            0: Never     // Possibillity to disabled the extension for some project
+            0: Never     // Possibility to disable the extension for some project
             1: Always    // (default) Save also single file with no workspaceFolder ("local-history.path" must be defined)
             2: Workspace // Save only files within workspaceFolder
 
