@@ -34,11 +34,18 @@ The files displayed depend on setting `local-history.maxDisplay` to see more, us
         "local-history.dateLocale":     // The locale to use when displaying date (e.g.: "fr-CH" or "en-GB" or ...)
 
         "local-history.path":     // Specify another location for .history folder (null: use workspaceFolder)
-            This settings must be an abolute path. You can also start your path with:
+            This settings must be an absolute path.
+
+            You can start your path with:
             ${workspaceFolder}: current workspace folder
                 e.g. ${workspaceFolder}/.vscode to save in each workspace folder .vscode/.history
-            ${workspaceFolder: 0}: first workspace folder
-                e.g. workspace folders A, B, C. But save always in A/.history
+            ${workspaceFolder: index}: specific workspace index
+                e.g. workspace folders A, B, C. But save always in A/.history => ${workspaceFolder: 0}
+
+            Your can also use specific variable in path:
+            - %variable%: an environnement variable (e.g. %AppData%)
+            - ~: the home directory (linux)
+
         "local-history.absolute": // Save absolute or relative path in local-history.path
             true:  (absolute) // <local-history.path>/.history/<absolutePath>
             false: (relative) // (default) <local-history.path>/.history/<workspaceFolder.basename>/<relativePath>

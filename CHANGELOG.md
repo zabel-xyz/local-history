@@ -1,4 +1,18 @@
-##1.7.0
+## 1.8.1
+* Fix error "Cannot find module 'path-is-inside'" [#102](https://github.com/zabel-xyz/local-history/issues/102)
+
+## 1.8.0
+### Improvements
+* Change settings dynamically [#38](https://github.com/zabel-xyz/local-history/issues/38)
+* Icon in side bar (use of svg) [#48](https://github.com/zabel-xyz/local-history/issues/48)
+* Icon for treeView (use of vscode builtin icons) [#95](https://github.com/zabel-xyz/local-history/issues/95)
+### Bugs fixed
+* Fix use of character ~ on linux system [#47](https://github.com/zabel-xyz/local-history/issues/47)
+* Use of fs.mkdirSync, fs.copyFile inplace of third library usage [#75](https://github.com/zabel-xyz/local-history/issues/75)
+* local-history.treeLocation not working [#98](https://github.com/zabel-xyz/local-history/issues/98)
+* Remove commands for tree in the command panel [#94](https://github.com/zabel-xyz/local-history/issues/94)
+
+## 1.7.0
 ### New features
 * 3 different history views (current, all, specific)
 * SubMenu item for restoring files [#23](https://github.com/zabel-xyz/local-history/issues/23)
@@ -8,16 +22,16 @@
 * Fix cannot read property 'document' of undefined [#31](https://github.com/zabel-xyz/local-history/issues/31)
 * Fix Cannot read property 'fsPath' of undefined [#35](https://github.com/zabel-xyz/local-history/issues/35)
 
-##1.6.2
+## 1.6.2
 ### New features
 * Add variable ${workspaceFolder} for setting "local-history.path"
 * Add variable ${workspaceFolder: 0} for setting "local-history.path in multi-root workspace"
 * Support for multi-root workspace
 
-##1.6.1
+## 1.6.1
 * Fix vscode.workspace.getWorkspaceFolder(file) return null when open from command line [#24](https://github.com/zabel-xyz/local-history/issues/24)
 
-##1.6.0
+## 1.6.0
 ### Bugs fixed
 * Fix delete file history in treeView.
 ### New features
@@ -25,16 +39,16 @@
 According to request [#20](https://github.com/zabel-xyz/local-history/issues/20)
 * New setting `local-history.dateLocale` to specify the locale to use when displaying date
 
-##1.5.2
+## 1.5.2
 * Fix error "Cannot read property 'document' of undefined" when opening a folder
 
-##1.5.1
+## 1.5.1
 * Fix calculate relative date
 
-##1.5.0
+## 1.5.0
 * Displays a local-history tree in the explorer pane [#21](https://github.com/zabel-xyz/local-history/issues/21)
 
-##1.4.0
+## 1.4.0
 * Add first file version [#9-#19](https://github.com/zabel-xyz/local-history/issues/19)
 * The minimum supported version of VS Code is now 1.15.0 (to support multi-root)
 

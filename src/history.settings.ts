@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import path = require('path');
+import os = require('os');
 
 const enum EHistoryEnabled {
     Never = 0,
@@ -76,10 +77,14 @@ export class HistorySettings {
                 return (folder === value.folder);
         });
         if (!settings) {
-            settings = this.read(folder, file);
+            settings = this.read(folder, file, wsFolder);
             this.settings.push(settings);
         }
         return settings;
+    }
+
+    public clear() {
+        this.settings = [];
     }
 
     /*
@@ -93,7 +98,7 @@ export class HistorySettings {
        saved in vscode.getworkspacefolder\.history\<relative>
        (no workspacefolder => not saved)
     */
-    private read(workspacefolder: vscode.Uri, file: vscode.Uri): IHistorySettings {
+    private read(workspacefolder: vscode.Uri, file: vscode.Uri, ws: vscode.WorkspaceFolder): IHistorySettings {
 
         // for now no ressource configurations
         // let config = vscode.workspace.getConfiguration('local-history', file),
@@ -118,8 +123,12 @@ export class HistorySettings {
         if (enabled !== EHistoryEnabled.Never) {
             historyPath = <string>config.get('path');
             if (historyPath) {
-                // replace variables like %AppData%
-                historyPath = historyPath.replace(/%([^%]+)%/g, (_, key) => process.env[key]);
+
+                historyPath = historyPath
+                        // replace variables like %AppData%
+                        .replace(/%([^%]+)%/g, (_, key) => process.env[key])
+                        // supports character ~ for homedir
+                        .replace(/^~/, os.homedir());
 
                 // start with
                 // ${workspaceFolder} => current workspace
@@ -134,7 +143,7 @@ export class HistorySettings {
                         const wsId = match[1];
                         if (wsId) {
                             const find = vscode.workspace.workspaceFolders.find(
-                                (ws) => Number.isInteger(wsId - 1) ? ws.index === Number.parseInt(wsId, 10) : ws.name === wsId);
+                                wsf => Number.isInteger(wsId - 1) ? wsf.index === Number.parseInt(wsId, 10) : wsf.name === wsId);
                             if (find)
                                 historyWS = find.uri;
                             else
@@ -216,6 +225,6 @@ export class HistorySettings {
     }
 
     private pathIsInside(test, parent) {
-        return require('path-is-inside')(test, parent);
+        return require('is-path-inside')(test, parent);
     }
 }
