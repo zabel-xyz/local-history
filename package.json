@@ -311,22 +311,21 @@
     "main": "./out/src/extension",
     "scripts": {
         "package": "vsce package",
-        "vscode:prepublish": "tsc -p ./",
-        "compile": "tsc -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install"
+        "compile": "tsc -p ./"
     },
     "dependencies": {
         "glob": "7.1.6",
         "anymatch": "3.1.1",
-        "is-path-inside": "3.0.2",
-        "rimraf": "3.0.2"
         "fs-copy-file": "2.1.2",
-        "vsce": "^1.50.0",
+        "is-path-inside": "3.0.2",
+        "rimraf": "3.0.2",
+        "@vscode/vsce": "2.15.0",
         "winattr": "^2.0.0"
     },
     "devDependencies": {
         "typescript": "3.7.5",
-        "vscode": "1.1.36",
+        "@types/vscode": "^1.42.0",
+        "@vscode/test-electron": "^1.5.0",
         "@types/node": "13.7.1"
     }
 }
