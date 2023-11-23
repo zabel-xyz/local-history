@@ -62,6 +62,37 @@ The files displayed depend on setting `local-history.maxDisplay` to see more, us
             explorer (default): // Show tree in Explorer item
             localHistory:       // Show tree in a special active bar item
 
+        "local-history.filename":
+            // use §p and ${workspaceFolder} only at the start of the name ('($p|${workspaceFolder})...'),
+            $p                 - folder of file // (default)
+            ${workspaceFolder} - project base folder
+
+            $n                 - file name
+            $e                 - file ending
+
+            $H                 - hour
+            $M                 - Minute
+            $d                 - Day
+            $m                 - Month
+            $Y                 - Year
+
+            $c                 - counter ($Xc) where X is number of displayed numbers 
+            $u                 - Username
+            $s                 - Session
+
+        "local-history.maxVersionCount":
+            -1 // (default) infinite
+
+        "local-history.saveOneStepAhead":
+            true // (default) The latest copy is equal to the source file
+            false // The latest copy is the pervies stand of the source file
+
+        "local-history.filenamePattern": // Files to save by filename pattern
+            * - matches 0 or more characters
+            !  - prefix marks the pattern as being negative, meaning that only files that don't match the pattern will be included.
+
+            ['**'] // (default)
+
 ## Commands
 
     local-history.showAll // Show all history available to select (limited with maxDisplay settings)

@@ -1,25 +1,25 @@
 {
-    "name": "local-history",
-    "displayName": "Local History",
-    "description": "Save files into local history",
-    "publisher": "xyz",
+	"name": "local-history-hks",
+	"displayName": "Local History HKS",
+	"description": "Save files into local history",
+    "publisher": "HKSInformatik",
     "version": "1.8.1",
     "engines": {
         "vscode": "^1.42.0"
     },
     "icon": "images/local-history.png",
-    "homepage": "https://github.com/zabel-xyz/local-history",
+    "homepage": "https://github.com/HKSInformatik/local-history",
     "repository": {
         "type": "git",
-        "url": "https://github.com/zabel-xyz/local-history.git"
+        "url": "https://github.com/HKSInformatik/local-history.git"
     },
-    "bugs": {
-        "url": "https://github.com/zabel-xyz/local-history/issues"
-    },
-    "keywords": [
-        "local",
-        "history",
-        "save",
+	"bugs": {
+		"url": "https://github.com/HKSInformatik/local-history/issues"
+	},
+	"keywords": [
+		"local",
+		"history",
+		"save",
         "backup",
         "multi-root ready"
     ],
@@ -275,7 +275,27 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Save absolute path in local-history.path"
-                },
+				},
+        "local-history.filename": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Save file with specific pattern (empty string is ignored)"
+        },
+        "local-history.filenamePattern": {
+                    "type": "array",
+                    "default": ["*"],
+                    "description": "If file name is defined, this defines on which files it should be applied"
+        },
+        "local-history.maxVersionCount": {
+                    "type": "number",
+                    "default": -1,
+                    "description": "Maximum amount of saves for a single file (-1: infinite)"
+        },
+        "local-history.saveOneStepAhead": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "If active, saves the current stand of file"
+        },
                 "local-history.treeLocation": {
                     "type": "string",
                     "default": "explorer",
@@ -290,19 +310,22 @@
     },
     "main": "./out/src/extension",
     "scripts": {
-        "vscode:prepublish": "tsc -p ./",
-        "compile": "tsc -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install"
+        "package": "vsce package",
+        "compile": "tsc -p ./"
     },
     "dependencies": {
         "glob": "7.1.6",
         "anymatch": "3.1.1",
+        "fs-copy-file": "2.1.2",
         "is-path-inside": "3.0.2",
-        "rimraf": "3.0.2"
+        "rimraf": "3.0.2",
+        "@vscode/vsce": "2.15.0",
+        "winattr": "^2.0.0"
     },
     "devDependencies": {
         "typescript": "3.7.5",
-        "vscode": "1.1.36",
+        "@types/vscode": "^1.42.0",
+        "@vscode/test-electron": "^1.5.0",
         "@types/node": "13.7.1"
     }
 }

@@ -24,6 +24,14 @@ export interface IHistorySettings {
     enabled: boolean;
     historyPath: string;
     absolute: boolean;
+    filename: string;
+    filenamePattern: RegExp[];
+    maxVersionCount: number;
+    saveOneStepAhead: boolean;
+}
+
+export function EscapeRegExp(text: string): string {
+    return text.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, '\\$&');
 }
 
 /**
@@ -178,6 +186,17 @@ export class HistorySettings {
         if (historyPath)
             historyPath = historyPath.replace(/\//g, path.sep);
 
+        const saveOneStepAhead = <boolean>config.get('saveOneStepAhead');
+        let filename = (<string>config.get('filename') || '').replace(/[<>*?":|]/g, '').replace('\\', '/'); // windows characters not allowed in file names, allow '\' | '/' for writing in sub folders;
+
+        while (filename.indexOf('/') === 0) {
+            filename = filename.slice(1);
+        }
+
+        if (filename.lastIndexOf('${workspaceFolder}') > 0 || filename.lastIndexOf('$p') > 0) {
+            filename = '';
+        }
+
         return {
             folder: workspacefolder,
             daysLimit: <number>config.get('daysLimit') || 30,
@@ -185,10 +204,24 @@ export class HistorySettings {
             maxDisplay: <number>config.get('maxDisplay') || 10,
             dateLocale: <string>config.get('dateLocale') || undefined,
             exclude: <string[]>config.get('exclude') || ['**/.history/**','**/.vscode/**','**/node_modules/**','**/typings/**','**/out/**'],
-            enabled: historyPath != null && historyPath !== '',
+            enabled: historyPath != null && historyPath !== '' || !!filename,
             historyPath: historyPath,
-            absolute: absolute
+            absolute: absolute,
+            filename: filename,
+            filenamePattern: this.filenamePatternToRexExp(<string[]>config.get('filenamePattern')) || [new RegExp('.*')],
+            maxVersionCount: <number>config.get('maxVersionCount') || -1,
+            saveOneStepAhead: saveOneStepAhead == null ? true : saveOneStepAhead
         };
+    }
+
+    private filenamePatternToRexExp(filenamePattern: string[]): RegExp[] {
+        return filenamePattern.map( y => {
+            let pattern = EscapeRegExp(y).replace(/\\\*/, '.*');
+            if (pattern[0] === '!') {
+                pattern = `((?!${pattern.slice(1)}$).*)`;
+            }
+            return new RegExp(`^${pattern}$`);
+        });
     }
 
     private pathIsInside(test, parent) {
